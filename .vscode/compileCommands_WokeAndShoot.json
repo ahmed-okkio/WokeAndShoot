@@ -1,0 +1,62 @@
+[
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\First person shooter mini game.txt",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShoot.Build.cs",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShoot.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShoot.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootCharacter.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootCharacter.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootGameMode.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootGameMode.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootHUD.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootHUD.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootProjectile.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootProjectile.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	}
+]

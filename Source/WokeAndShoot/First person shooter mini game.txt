@@ -1,0 +1,16 @@
+First person shooter mini game general ideas:
+    bright colors
+    low polygon
+    simple, one gun, one reload system.
+    fast highly mechanical movement
+    high-low map, easily move meant, peek hotspots
+
+Objective:
+    Kill other players
+
+Appeal:
+    Fast paced
+    Highly mechanical
+    Aim training
+    Quick
+    Dynamic

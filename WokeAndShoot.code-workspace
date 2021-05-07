@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "WokeAndShoot",
+			"path": "."
+		},
+		{
+			"name": "UE4",
+			"path": "S:\\Unreal Engine Versions\\UE_4.26"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	}
+}
