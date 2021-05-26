@@ -25,10 +25,17 @@ AWokeAndShootProjectile::AWokeAndShootProjectile()
 	// Use a ProjectileMovementComponent to govern this projectile's movement
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 3000.f;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-
+	ProjectileMovement->InitialSpeed = 10000.f;
+	// ProjectileMovement->AddForce(GetActorRotation().Vector() * 350000.f);
+	// ProjectileMovement->MaxSpeed = 55000.f;
+	// ProjectileMovement->bRotationFollowsVelocity = true;
+	FTimerHandle TracerUpdateTH;
+	if(GetWorld() != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SPEED UPDATE TIMER"));
+		// GetWorld()->GetTimerManager().SetTimer(TracerUpdateTH, this, &AWokeAndShootProjectile::UpdateSpeed, 0.005, false);
+	}
+	
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
 }
@@ -39,12 +46,41 @@ void AWokeAndShootProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherA
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) /*&& OtherComp->IsSimulatingPhysics()*/)
 	{
 		// OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
-		// Destroy();
+		// if(GetOwner() != nullptr)
+		// {
+		// 	UE_LOG(LogTemp,Warning,TEXT("%s"),*GetOwner()->GetName());
+		// }
+		// else
+		// {
+		// 	GLog->Log("No Owner");
+		// }
+		Destroy();
 	}
+}
+
+AActor* AWokeAndShootProjectile::GetOwnerActor() 
+{
+	AActor* OwnerActor = GetOwner();
+	if (OwnerActor != nullptr)
+	{
+		return GetOwner();
+	}
+	else
+	{
+		return nullptr;
+	}
+
 }
 
 UStaticMeshComponent* AWokeAndShootProjectile::GetProjectileMesh() 
 {
 	 return ProjectileStaticMesh;
+}
+void AWokeAndShootProjectile::UpdateSpeed() 
+{
+	// ProjectileMovement->Velocity = GetActorRotation().Vector() * 45000.f;
+	ProjectileMovement->AddForce(GetActorRotation().Vector() * 45000.f);
+	// CollisionComp->ComponentVelocity = 25000.f;
+	UE_LOG(LogTemp, Warning, TEXT("UPDATE SPEED"));
+
 }

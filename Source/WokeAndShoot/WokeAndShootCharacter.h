@@ -45,13 +45,26 @@ private:
 		UParticleSystem* BulletImpact;
 		//Shooting Range
 	UPROPERTY(EditAnywhere, Category = Gameplay)
-		float Range = 5000.f;
+		float Range = 10000.f;
+
+	UPROPERTY(EditAnywhere, Category = Gameplay)
+		float StrafeMultiplier = 2.f;
 
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 		FVector FullScale = FVector(1,1,1);
 
 		FVector DynamicSourceTest;
-	
+
+		// AWokeAndShootProjectile* Projectile;
+		USceneComponent* ProjectileSceneComp;
+
+		FVector WishDir;
+
+private:
+
+	//AirStrafe Handler
+	void AirStrafeHandler(float& DeltaTime);
+
 
 public:
 	AWokeAndShootCharacter();
@@ -89,7 +102,7 @@ protected:
 	void UpdateTracerSource(UParticleSystemComponent* TracerComponent, FVector DynamicTracerSource, FVector Target);
 
 	//Get ViewPoint Rotation and Location
-	void GetViewPointRotLoc(FVector &ViewPointLocation, FRotator &ViewPointRotation);
+	void GetViewPointRotLoc(FVector &ViewPointLocation, FRotator &ViewPointRotation) const;
 
 	/** Fires a projectile. */
 	void OnFire();
@@ -103,6 +116,8 @@ protected:
 	/** Handles stafing movement, left and right */
 	void MoveRight(float Val);
 
+	void JumpHandler(float Val);
+
 	/**
 	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -114,6 +129,9 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookLeftRight(float Rate);
+
+	//CharacterMovement
+	UCharacterMovementComponent* CharacterMovement;
 	
 protected:
 	// APawn interface
@@ -126,6 +144,12 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	//Apply impulse to a direction
+	void DirectionalImpulse(FVector ImpulseDirection);
+
+	//Tick Function
+	virtual void Tick(float DeltaTime)override;
 
 };
 

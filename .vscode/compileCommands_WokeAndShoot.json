@@ -1,5 +1,15 @@
 [
 	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\BoostPad.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\BoostPad.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\First person shooter mini game.txt",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.182.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"

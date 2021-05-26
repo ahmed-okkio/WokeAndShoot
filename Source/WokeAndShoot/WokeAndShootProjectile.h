@@ -22,6 +22,8 @@ class AWokeAndShootProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
+	void UpdateSpeed();
+
 protected:
 	FVector ProjectileDefaultSize;
 public:
@@ -30,6 +32,10 @@ public:
 	/** called when projectile hits something */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	//Return Owner
+	AActor* GetOwnerActor();
+
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* ProjectileStaticMesh;
 
