@@ -60,10 +60,22 @@ private:
 
 		FVector WishDir;
 
+		FRotator CorrectedPivot;
+
 private:
 
 	//AirStrafe Handler
 	void AirStrafeHandler(float& DeltaTime);
+
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_CorrectPitch(float Pitch);
+	bool Server_CorrectPitch_Validate(float Pitch);
+	void Server_CorrectPitch_Implementation(float Pitch);
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_CorrectPitch(float Pitch);
+	bool Multi_CorrectPitch_Validate(float Pitch);
+	void Multi_CorrectPitch_Implementation(float Pitch);
 
 
 public:

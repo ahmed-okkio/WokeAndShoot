@@ -14,6 +14,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "WokeAndShoot/WokeAndShootProjectile.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SceneComponent.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -62,9 +63,17 @@ void AWokeAndShootCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-
+	if(HasAuthority())
+	{
+		SetReplicateMovement(true);
+		SetReplicates(true);
+	}
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	// if()
+	// {
+	// 	GLog->Log("GripPoint Found Attached");
+	// }
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -72,7 +81,8 @@ void AWokeAndShootCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	// UE_LOG(LogTemp,Warning,TEXT("FV: %s"),*GetVelocity().ToString());
-	AirStrafeHandler(DeltaTime)	;
+	AirStrafeHandler(DeltaTime);
+
 }
 
 // Input
@@ -135,7 +145,10 @@ void AWokeAndShootCharacter::OnFire()
 			ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
 
 			//Bullet Impact + Tracer
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitResult.Location, ShotDirection.Rotation());
+			if(BulletImpact)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitResult.Location, ShotDirection.Rotation());
+			}
 			DrawBulletTracers(ViewPointLocation, SpawnLocation, HitResult.Location, ShotDirection, Distance);
 		}
 		else 
@@ -191,10 +204,9 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 {
 	//Refactor when tracers are complete
 	UParticleSystemComponent* TracerComponent;
+	if(TracerParticle == nullptr){return;}
 	if (Distance == Range)
 	{
-		FLAG("NEW EMITTER");
-		UE_LOG(LogTemp, Warning , TEXT("%s"),*HitResultLocation.ToString());		
 		TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),TracerParticle,SpawnLocation, ShotDirection.Rotation());
 	}
 	else
@@ -205,7 +217,7 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 	//Set Spawn Collision Handling Override
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	if (TracerParticle)
+	if (TracerComponent)
 	{
 		FVector DynamicTracerSource = SpawnLocation;
 		FVector Target =  HitResultLocation;
@@ -229,7 +241,6 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 	}
 	else if (TracerComponent->IsActive() == true)
 	{
-		UE_LOG(LogTemp,Warning, TEXT("TEST3"));
 		TracerComponent->SetActive(false, true);
 	}
 }
@@ -275,6 +286,17 @@ void AWokeAndShootCharacter::JumpHandler(float Val)
 void AWokeAndShootCharacter::LookUpDown(float Rate)
 {
 	APawn::AddControllerPitchInput(Sensitivity * Rate);
+
+	//Network
+	if(HasAuthority())
+	{
+		Multi_CorrectPitch(GetViewRotation().Pitch);
+	}
+	else
+	{
+		Server_CorrectPitch(GetViewRotation().Pitch);
+	}
+	
 }
 
 void AWokeAndShootCharacter::LookLeftRight(float Rate)
@@ -300,12 +322,44 @@ void AWokeAndShootCharacter::AirStrafeHandler(float& DeltaTime)
 		AddSpeed = FMath::Max(AddSpeed,0.f);
 
 		FVector FinalImpulse = (WishDir * AddSpeed *0.8);
+		if(HasAuthority())
+		{
+			CharacterMovement->AddImpulse(FinalImpulse,false);
+		}
 		
-		CharacterMovement->AddImpulse(FinalImpulse,false);
 		
 	}
 	else
 	{
 		WishDir = FVector (0,0,0);
 	}
+}
+
+bool AWokeAndShootCharacter::Server_CorrectPitch_Validate(float Pitch) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_CorrectPitch_Implementation(float Pitch) 
+{
+	FRotator CameraRotation = FirstPersonCameraComponent->GetRelativeRotation();
+	CameraRotation.Pitch = Pitch;
+	FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
+	Multi_CorrectPitch(GetViewRotation().Pitch);
+}
+
+bool AWokeAndShootCharacter::Multi_CorrectPitch_Validate(float Pitch) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Multi_CorrectPitch_Implementation(float Pitch) 
+{
+	if(!IsLocallyControlled())
+	{
+		FRotator CameraRotation = FirstPersonCameraComponent->GetRelativeRotation();
+		CameraRotation.Pitch = Pitch;
+		FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
+	}
+	
 }
