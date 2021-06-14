@@ -20,7 +20,10 @@ ABoostPad::ABoostPad()
 	RootComponent = CollisionComp;
 	PadMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoostPadMesh"));
 	PadMesh->AttachTo(CollisionComp);
-	PadMesh->OnComponentHit.AddDynamic(this, &ABoostPad::OnHit);
+	if(HasAuthority())
+	{
+		PadMesh->OnComponentHit.AddDynamic(this, &ABoostPad::OnHit);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -51,11 +54,11 @@ void ABoostPad::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimiti
 			AWokeAndShootCharacter* HitActor = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
 			if (HitActor != nullptr)
 			{
-				if (CooldownList.Contains(HitActor)){continue;}
 				FVector ActorLocation = HitActor->GetActorLocation();
 
+				if (CooldownList.Contains(HitActor)){continue;}
 				if(!WithinConeRange(SweepStart, ActorLocation)){continue;}
-				
+
 				//Calculate Impulse direction+amount
 				FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
 				ImpulseDirection.Normalize();
@@ -63,10 +66,13 @@ void ABoostPad::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimiti
 
 				//Apply Impulse
 				HitActor->DirectionalImpulse(ImpulseDirection);
-
 				//Add Cooldown
 				InitiateCooldown(HitActor);
 
+				
+
+
+				
 				//Debug Line for Forward Facing Line
 				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
 				// GLog->Log("Character Hit");
@@ -117,3 +123,37 @@ bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation)
 	else
 		return true;
 }
+
+// bool ABoostPad::Server_RelayBoost_Validate(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor ) 
+// {
+// 	return true;
+// }
+
+// void ABoostPad::Server_RelayBoost_Implementation(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor ) 
+// {
+// 	if (CooldownList.Contains(HitActor)){return;}
+// 	if(!WithinConeRange(SweepStart, ActorLocation)){return;}
+// 	GLog->Log("Passed range and cd check");
+// 	//Apply Impulse
+// 	HitActor->DirectionalImpulse(ImpulseDirection);
+// 	//Add Cooldown
+// 	InitiateCooldown(HitActor);
+// 	Multi_RelayBoost(ActorLocation, HitActor);
+
+// }
+
+// bool ABoostPad::Multi_RelayBoost_Validate(FVector ActorLocation, AWokeAndShootCharacter* HitActor) 
+// {
+// 	return true;
+// }
+
+// void ABoostPad::Multi_RelayBoost_Implementation(FVector ActorLocation, AWokeAndShootCharacter* HitActor) 
+// {
+// 	//Calculate Impulse direction+amount
+// 	FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
+// 	ImpulseDirection.Normalize();
+// 	ImpulseDirection*= BoostAmount;
+
+// 	//Apply Impulse
+// 	HitActor->DirectionalImpulse(ImpulseDirection);
+// }

@@ -28,13 +28,24 @@ private:
 
 	FTimerDelegate PopDelegate;
 
-
+private:
 
 	void RemoveActorCD();
 	
 	void InitiateCooldown(AWokeAndShootCharacter* HitActor);
 
 	bool WithinConeRange(FVector& PadLocation, FVector& HitActorLocation);
+
+	// UFUNCTION(Server,Reliable,WithValidation)
+	// void Server_RelayBoost(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor );
+	// bool Server_RelayBoost_Validate(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor );
+	// void Server_RelayBoost_Implementation(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor);
+
+	// UFUNCTION(NetMulticast,Reliable,WithValidation)
+	// void Multi_RelayBoost(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
+	// bool Multi_RelayBoost_Validate(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
+	// void Multi_RelayBoost_Implementation(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
+
 	
 
 public:	

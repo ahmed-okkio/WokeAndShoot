@@ -32,7 +32,6 @@ AWokeAndShootProjectile::AWokeAndShootProjectile()
 	FTimerHandle TracerUpdateTH;
 	if(GetWorld() != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SPEED UPDATE TIMER"));
 		// GetWorld()->GetTimerManager().SetTimer(TracerUpdateTH, this, &AWokeAndShootProjectile::UpdateSpeed, 0.005, false);
 	}
 	

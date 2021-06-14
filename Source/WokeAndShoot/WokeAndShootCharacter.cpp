@@ -15,13 +15,15 @@
 #include "WokeAndShoot/WokeAndShootProjectile.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SceneComponent.h"
+#include "MyCharacterMovementComponent.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 #define FLAG(x) UE_LOG(LogTemp,Warning, TEXT(x))
 //////////////////////////////////////////////////////////////////////////
 // AWokeAndShootCharacter
-AWokeAndShootCharacter::AWokeAndShootCharacter()
+AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UMyCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -65,8 +67,8 @@ void AWokeAndShootCharacter::BeginPlay()
 	Super::BeginPlay();
 	if(HasAuthority())
 	{
-		SetReplicateMovement(true);
-		SetReplicates(true);
+		// SetReplicateMovement(true);
+		// SetReplicates(true);
 	}
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
@@ -81,7 +83,7 @@ void AWokeAndShootCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	// UE_LOG(LogTemp,Warning,TEXT("FV: %s"),*GetVelocity().ToString());
-	AirStrafeHandler(DeltaTime);
+	// AirStrafeHandler(DeltaTime);
 
 }
 
@@ -144,16 +146,31 @@ void AWokeAndShootCharacter::OnFire()
 			Projectile->SetOwner(this);
 			ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
 
+
 			//Bullet Impact + Tracer
 			if(BulletImpact)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitResult.Location, ShotDirection.Rotation());
 			}
-			DrawBulletTracers(ViewPointLocation, SpawnLocation, HitResult.Location, ShotDirection, Distance);
+
+
+			// DrawBulletTracers(ViewPointLocation, SpawnLocation, HitResult.Location, ShotDirection, Distance);
+
+
+			//Network
+			if(!HasAuthority())
+			{
+				Server_RelayShot(SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
+			}
+			else
+			{
+				Multi_RelayShot(SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
+			}
+			
 		}
 		else 
 		{
-			DrawBulletTracers(ViewPointLocation, SpawnLocation, EndPoint, ShotDirection, Range);
+			// DrawBulletTracers(ViewPointLocation, SpawnLocation, EndPoint, ShotDirection, Range);
 		}
 	} 	
 
@@ -250,6 +267,10 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 //Movement
 void AWokeAndShootCharacter::MoveForward(float Value)
 {
+	Client_MoveForwardAxis = Value;
+
+	//Relay Axis to Server
+	Server_RelayForwardAxis(Value);
 	if (Value != 0.0f)
 	{
 		//Wishdir (airstrafe) params, Wish dir is only calculated while pressing W
@@ -261,10 +282,15 @@ void AWokeAndShootCharacter::MoveForward(float Value)
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
+	
 }
 
 void AWokeAndShootCharacter::MoveRight(float Value)
 {
+	//Set Local Axis Variable
+	Client_MoveRightAxis = Value;
+	// Relay Axis to Server
+	Server_RelayRightAxis(Value);
 	if (Value != 0.0f)
 	{
 		//Restricts left right speed when in air
@@ -273,6 +299,8 @@ void AWokeAndShootCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);
 	}
+
+	
 }
 
 void AWokeAndShootCharacter::JumpHandler(float Val) 
@@ -322,16 +350,12 @@ void AWokeAndShootCharacter::AirStrafeHandler(float& DeltaTime)
 		AddSpeed = FMath::Max(AddSpeed,0.f);
 
 		FVector FinalImpulse = (WishDir * AddSpeed *0.8);
-		if(HasAuthority())
-		{
-			CharacterMovement->AddImpulse(FinalImpulse,false);
-		}
-		
-		
+
+		CharacterMovement->AddImpulse(FinalImpulse,false);
 	}
 	else
 	{
-		WishDir = FVector (0,0,0);
+		
 	}
 }
 
@@ -362,4 +386,85 @@ void AWokeAndShootCharacter::Multi_CorrectPitch_Implementation(float Pitch)
 		FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
 	}
 	
+}
+
+bool AWokeAndShootCharacter::Server_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+{
+	AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+	Projectile->SetOwner(this);
+	ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
+
+	//Bullet Impact + Tracer
+	if(BulletImpact)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitLocation, ShotDirection);
+	}
+
+	Multi_RelayShot(SpawnLocation, SpawnRotation, HitLocation, ShotDirection);
+}
+
+bool AWokeAndShootCharacter::Multi_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+{
+	return true;	
+}
+
+void AWokeAndShootCharacter::Multi_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+{
+	if(!IsLocallyControlled())
+	{
+		AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+		Projectile->SetOwner(this);
+		ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
+
+		//Bullet Impact + Tracer
+		if(BulletImpact)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitLocation, ShotDirection);
+		}
+	}
+}
+
+bool AWokeAndShootCharacter::Server_CorrectAirStrafe_Validate(float Pitch) 
+{
+	return true;	
+}
+
+void AWokeAndShootCharacter::Server_CorrectAirStrafe_Implementation(float Pitch) 
+{
+	
+}
+
+bool AWokeAndShootCharacter::Multi_CorrectAirStrafe_Validate(float Pitch) 
+{
+	return true;		
+}
+
+void AWokeAndShootCharacter::Multi_CorrectAirStrafe_Implementation(float Pitch) 
+{
+	
+}
+
+bool AWokeAndShootCharacter::Server_RelayForwardAxis_Validate(float MoveForwardAxisParam) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayForwardAxis_Implementation(float MoveForwardAxisParam) 
+{
+	Client_MoveForwardAxis = MoveForwardAxisParam;
+}
+
+bool AWokeAndShootCharacter::Server_RelayRightAxis_Validate(float MoveRightAxisParam) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayRightAxis_Implementation(float MoveRightAxisParam) 
+{
+	Client_MoveRightAxis = MoveRightAxisParam;
 }

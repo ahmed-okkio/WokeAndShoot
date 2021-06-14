@@ -67,6 +67,8 @@ private:
 	//AirStrafe Handler
 	void AirStrafeHandler(float& DeltaTime);
 
+
+	//Network
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_CorrectPitch(float Pitch);
 	bool Server_CorrectPitch_Validate(float Pitch);
@@ -77,9 +79,41 @@ private:
 	bool Multi_CorrectPitch_Validate(float Pitch);
 	void Multi_CorrectPitch_Implementation(float Pitch);
 
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayShot(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	bool Server_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	void Server_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_RelayShot(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	bool Multi_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	void Multi_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_CorrectAirStrafe(float Pitch);
+	bool Server_CorrectAirStrafe_Validate(float Pitch);
+	void Server_CorrectAirStrafe_Implementation(float Pitch);
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_CorrectAirStrafe(float Pitch);
+	bool Multi_CorrectAirStrafe_Validate(float Pitch);
+	void Multi_CorrectAirStrafe_Implementation(float Pitch);
+
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayForwardAxis(float MoveForwardAxisParam);
+	bool Server_RelayForwardAxis_Validate(float MoveForwardAxisParam);
+	void Server_RelayForwardAxis_Implementation(float MoveForwardAxisParam);
+
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayRightAxis(float MoveRightAxisParam);
+	bool Server_RelayRightAxis_Validate(float MoveRightAxisParam);
+	void Server_RelayRightAxis_Implementation(float MoveRightAxisParam);
+
 
 public:
-	AWokeAndShootCharacter();
+	AWokeAndShootCharacter(const class FObjectInitializer& ObjectInitializer);
+
+	
 
 protected:
 	virtual void BeginPlay();
@@ -105,6 +139,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
 
+	float Client_MoveRightAxis;
+	float Client_MoveForwardAxis;
 
 
 protected:
