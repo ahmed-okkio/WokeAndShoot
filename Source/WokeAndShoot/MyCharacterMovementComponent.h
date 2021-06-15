@@ -15,9 +15,13 @@ class WOKEANDSHOOT_API UMyCharacterMovementComponent : public UCharacterMovement
 	GENERATED_BODY()
 #pragma region Defaults
 private:
-
+	//Variable that controls how much speed air strafing will provide
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
-	float StrafeMultiplier = 0.5f;
+	float StrafeMultiplier = 0.1f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
+	//0.01 Closer to games like Valorant
+	float StrafeSharpness = 0.01;
+	
 
 #pragma endregion
 

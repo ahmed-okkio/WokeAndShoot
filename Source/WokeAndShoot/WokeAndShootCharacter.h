@@ -70,14 +70,14 @@ private:
 
 	//Network
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_CorrectPitch(float Pitch);
-	bool Server_CorrectPitch_Validate(float Pitch);
-	void Server_CorrectPitch_Implementation(float Pitch);
+	void Server_RelayPitch(float Pitch);
+	bool Server_RelayPitch_Validate(float Pitch);
+	void Server_RelayPitch_Implementation(float Pitch);
 
 	UFUNCTION(NetMulticast,Reliable,WithValidation)
-	void Multi_CorrectPitch(float Pitch);
-	bool Multi_CorrectPitch_Validate(float Pitch);
-	void Multi_CorrectPitch_Implementation(float Pitch);
+	void Multi_RelayPitch(float Pitch);
+	bool Multi_RelayPitch_Validate(float Pitch);
+	void Multi_RelayPitch_Implementation(float Pitch);
 
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_RelayShot(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
@@ -88,16 +88,6 @@ private:
 	void Multi_RelayShot(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
 	bool Multi_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
 	void Multi_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
-	
-	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_CorrectAirStrafe(float Pitch);
-	bool Server_CorrectAirStrafe_Validate(float Pitch);
-	void Server_CorrectAirStrafe_Implementation(float Pitch);
-
-	UFUNCTION(NetMulticast,Reliable,WithValidation)
-	void Multi_CorrectAirStrafe(float Pitch);
-	bool Multi_CorrectAirStrafe_Validate(float Pitch);
-	void Multi_CorrectAirStrafe_Implementation(float Pitch);
 
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_RelayForwardAxis(float MoveForwardAxisParam);

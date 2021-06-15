@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SceneComponent.h"
 #include "MyCharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -72,19 +73,13 @@ void AWokeAndShootCharacter::BeginPlay()
 	}
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	// if()
-	// {
-	// 	GLog->Log("GripPoint Found Attached");
-	// }
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
 	
-	// UE_LOG(LogTemp,Warning,TEXT("FV: %s"),*GetVelocity().ToString());
 	// AirStrafeHandler(DeltaTime);
-
 }
 
 // Input
@@ -111,7 +106,7 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 }
 
 
-
+//Refactor 
 void AWokeAndShootCharacter::OnFire()
 {
 	// Prepare parameters for line trace and hit scan
@@ -267,21 +262,29 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 //Movement
 void AWokeAndShootCharacter::MoveForward(float Value)
 {
-	Client_MoveForwardAxis = Value;
-
-	//Relay Axis to Server
-	Server_RelayForwardAxis(Value);
 	if (Value != 0.0f)
 	{
-		//Wishdir (airstrafe) params, Wish dir is only calculated while pressing W
-		float MoveRightAxis = InputComponent->GetAxisValue(TEXT("MoveRight"));
-		float MoveForwardAxis = Value;
-		FVector InputAxis = FVector(MoveForwardAxis,MoveRightAxis,0);
-		WishDir = InputAxis.RotateAngleAxis(FirstPersonCameraComponent->GetComponentRotation().Yaw,FVector (0,0,1));
-
-		// add movement in that direction
+		// //Wishdir (airstrafe) params, Wish dir is only calculated while pressing W
+		// float MoveRightAxis = InputComponent->GetAxisValue(TEXT("MoveRight"));
+		// float MoveForwardAxis = Value;
+		// FVector InputAxis = FVector(MoveForwardAxis,MoveRightAxis,0);
+		// WishDir = InputAxis.RotateAngleAxis(FirstPersonCameraComponent->GetComponentRotation().Yaw,FVector (0,0,1));
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
+	else if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
+	{
+		//Keep Movement going while air strafing without holding W
+		FVector VelocityNoZ = UKismetMathLibrary::LessLess_VectorRotator(GetVelocity(),GetActorRotation());
+		if(VelocityNoZ.X > 600)
+			Value = 1.f;
+		else if(VelocityNoZ.X < -600)
+			Value = -1.f;
+	}
+	
+	AddMovementInput(GetActorForwardVector(), Value);
+	Client_MoveForwardAxis = Value;
+	//Relay Axis to Server
+	Server_RelayForwardAxis(Value);
 	
 }
 
@@ -299,8 +302,6 @@ void AWokeAndShootCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);
 	}
-
-	
 }
 
 void AWokeAndShootCharacter::JumpHandler(float Val) 
@@ -318,11 +319,11 @@ void AWokeAndShootCharacter::LookUpDown(float Rate)
 	//Network
 	if(HasAuthority())
 	{
-		Multi_CorrectPitch(GetViewRotation().Pitch);
+		Multi_RelayPitch(GetViewRotation().Pitch);
 	}
 	else
 	{
-		Server_CorrectPitch(GetViewRotation().Pitch);
+		Server_RelayPitch(GetViewRotation().Pitch);
 	}
 	
 }
@@ -337,47 +338,50 @@ void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection)
 	CharacterMovement->AddImpulse(ImpulseDirection);
 }
 
-void AWokeAndShootCharacter::AirStrafeHandler(float& DeltaTime) 
-{
-	if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
-	{
-		float CurrentSpeed = FVector::DotProduct(GetVelocity(),WishDir);
 
-		float MaxAccelDeltaTime = CharacterMovement->MaxAcceleration * DeltaTime;
+// void AWokeAndShootCharacter::AirStrafeHandler(float& DeltaTime) 
+// {
+// 	if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
+// 	{
+// 		float CurrentSpeed = FVector::DotProduct(GetVelocity(),WishDir);
+//
+// 		float MaxAccelDeltaTime = CharacterMovement->MaxAcceleration * DeltaTime;
+//
+// 		float AddSpeed = CharacterMovement->MaxWalkSpeed - CurrentSpeed;
+// 		AddSpeed = FMath::Min(MaxAccelDeltaTime, AddSpeed);
+// 		AddSpeed = FMath::Max(AddSpeed,0.f);
+//
+// 		FVector FinalImpulse = (WishDir * AddSpeed *0.8);
+//
+// 		CharacterMovement->AddImpulse(FinalImpulse,false);
+// 	}
+// 	else
+// 	{
+//		
+// 	}
+// }
 
-		float AddSpeed = CharacterMovement->MaxWalkSpeed - CurrentSpeed;
-		AddSpeed = FMath::Min(MaxAccelDeltaTime, AddSpeed);
-		AddSpeed = FMath::Max(AddSpeed,0.f);
 
-		FVector FinalImpulse = (WishDir * AddSpeed *0.8);
-
-		CharacterMovement->AddImpulse(FinalImpulse,false);
-	}
-	else
-	{
-		
-	}
-}
-
-bool AWokeAndShootCharacter::Server_CorrectPitch_Validate(float Pitch) 
+//Relay Pitch
+bool AWokeAndShootCharacter::Server_RelayPitch_Validate(float Pitch) 
 {
 	return true;
 }
 
-void AWokeAndShootCharacter::Server_CorrectPitch_Implementation(float Pitch) 
+void AWokeAndShootCharacter::Server_RelayPitch_Implementation(float Pitch) 
 {
 	FRotator CameraRotation = FirstPersonCameraComponent->GetRelativeRotation();
 	CameraRotation.Pitch = Pitch;
 	FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
-	Multi_CorrectPitch(GetViewRotation().Pitch);
+	Multi_RelayPitch(GetViewRotation().Pitch);
 }
 
-bool AWokeAndShootCharacter::Multi_CorrectPitch_Validate(float Pitch) 
+bool AWokeAndShootCharacter::Multi_RelayPitch_Validate(float Pitch) 
 {
 	return true;
 }
 
-void AWokeAndShootCharacter::Multi_CorrectPitch_Implementation(float Pitch) 
+void AWokeAndShootCharacter::Multi_RelayPitch_Implementation(float Pitch) 
 {
 	if(!IsLocallyControlled())
 	{
@@ -388,6 +392,8 @@ void AWokeAndShootCharacter::Multi_CorrectPitch_Implementation(float Pitch)
 	
 }
 
+
+//Relay Shot
 bool AWokeAndShootCharacter::Server_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
 {
 	return true;
@@ -429,26 +435,8 @@ void AWokeAndShootCharacter::Multi_RelayShot_Implementation(FVector SpawnLocatio
 	}
 }
 
-bool AWokeAndShootCharacter::Server_CorrectAirStrafe_Validate(float Pitch) 
-{
-	return true;	
-}
 
-void AWokeAndShootCharacter::Server_CorrectAirStrafe_Implementation(float Pitch) 
-{
-	
-}
-
-bool AWokeAndShootCharacter::Multi_CorrectAirStrafe_Validate(float Pitch) 
-{
-	return true;		
-}
-
-void AWokeAndShootCharacter::Multi_CorrectAirStrafe_Implementation(float Pitch) 
-{
-	
-}
-
+//Relay Movement Axis Inputs
 bool AWokeAndShootCharacter::Server_RelayForwardAxis_Validate(float MoveForwardAxisParam) 
 {
 	return true;
