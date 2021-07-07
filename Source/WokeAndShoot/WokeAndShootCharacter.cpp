@@ -5,7 +5,6 @@
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-// #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -17,6 +16,8 @@
 #include "Components/SceneComponent.h"
 #include "MyCharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "CharacterComponenets/HealthComponent.h"
+#include "BoostPad.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -46,11 +47,18 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 
 	// Create a gun mesh component
 	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
-	FP_Gun->SetOnlyOwnerSee(false);			// otherwise won't be visible in the multiplayer
+	FP_Gun->SetOnlyOwnerSee(true);			// otherwise won't be visible in the multiplayer
 	FP_Gun->bCastDynamicShadow = false;
 	FP_Gun->CastShadow = false;
-	// FP_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
+	FP_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
 	FP_Gun->SetupAttachment(RootComponent);
+
+	//Create a third person body mesh component
+	TP_Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Third_Person Body"));
+	TP_Body->SetOwnerNoSee(true);
+	// TP_Body->SetOnlyOwnerSee(false);
+	TP_Body->SetupAttachment(RootComponent);	
+
 
 	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	FP_MuzzleLocation->SetupAttachment(FP_Gun,TEXT("Muzzle"));
@@ -58,6 +66,9 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 
 	//Set Character Movement Component
 	CharacterMovement = GetCharacterMovement();
+
+	//Set Health Component
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	// Default offset from the character location for projectiles to spawn
 	// GunOffset = FVector(100.0f, 0.0f, 10.0f);
 }
@@ -68,19 +79,27 @@ void AWokeAndShootCharacter::BeginPlay()
 	Super::BeginPlay();
 	if(HasAuthority())
 	{
-		// SetReplicateMovement(true);
+		// SetReplicateMovement(false);
 		// SetReplicates(true);
 	}
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-	
+	// if(!CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection == 0)
+	// {
+	// 	GLog->Log("IgnoredMovement");
+	// }
+	// else
+	// {
+	// 	GLog->Log("Not Ignored");
+	// }
 	// AirStrafeHandler(DeltaTime);
 }
+
 
 // Input
 void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -105,6 +124,16 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("LookUp", this, &AWokeAndShootCharacter::LookUpDown);
 }
 
+void AWokeAndShootCharacter::CustomTakeDamage(float DamageAmount) 
+{
+	HealthComponent->ApplyDamage(DamageAmount);
+}
+
+void AWokeAndShootCharacter::CustomTakeHeal(float HealAmount) 
+{
+	HealthComponent->ApplyHeal(HealAmount);	
+}
+
 
 //Refactor 
 void AWokeAndShootCharacter::OnFire()
@@ -118,7 +147,9 @@ void AWokeAndShootCharacter::OnFire()
 
 	// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
 	if (FP_MuzzleLocation == nullptr)
+	{
 		return;
+	}	
 
 	FVector SpawnLocation = FP_MuzzleLocation->GetComponentLocation();
 	FVector ShotDirection = FP_MuzzleLocation->GetComponentRotation().Vector();
@@ -128,18 +159,57 @@ void AWokeAndShootCharacter::OnFire()
 	if (World != nullptr)
 	{
 		//LineTrace
+		// bool bLineTrace = false;
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
-		bool bLineTrace = World->LineTraceSingleByChannel(HitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
+		if(HasAuthority())
+		{
+			bool bLineTrace = World->LineTraceSingleByChannel(HitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
+			if (bLineTrace)
+			{
+				//Kill Player Hit
+				// HandleDeath();
+				AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
+				if(Character)
+				{
+					Character->HealthComponent->ApplyDamage(100.f);
+					Multi_RelayDamage(100.f, HitResult.GetActor());
+				}
+			}
+		}
+		else
+		{
+			Server_RelayHitScan(World, ViewPointLocation, EndPoint);
+		}
+
+		bool bOfflineLineTrace = World->LineTraceSingleByChannel(HitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
 		
-		if (bLineTrace)
+		if (bOfflineLineTrace)
 		{
 			float Distance = FVector::Dist(SpawnLocation, HitResult.Location);
+			// AActor* Projectile = World->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+			// Projectile->SetOwner(this);
+			// ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
 
-			AActor* Projectile = World->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
-			Projectile->SetOwner(this);
-			ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
+			//Check if ActorHit is a BoostPad
+			
+			ABoostPad* HitBoostPad = Cast<ABoostPad>(HitResult.GetActor());
+			if(HitBoostPad)
+			{
+				
+				HitBoostPad->BoostPlayers(this);
+
+				//Network
+				if(!HasAuthority())
+				{
+					Server_RelayBoost(HitBoostPad);
+				}
+				else
+				{
+					// Multi_RelayBoost(HitBoostPad);
+				}
+			}
 
 
 			//Bullet Impact + Tracer
@@ -151,17 +221,16 @@ void AWokeAndShootCharacter::OnFire()
 
 			// DrawBulletTracers(ViewPointLocation, SpawnLocation, HitResult.Location, ShotDirection, Distance);
 
-
+			// START HERE
 			//Network
 			if(!HasAuthority())
 			{
-				Server_RelayShot(SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
+				Server_RelayShot(HitResult, SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
 			}
 			else
 			{
-				Multi_RelayShot(SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
+				Multi_RelayShot(HitResult, SpawnLocation, SpawnRotation, HitResult.Location, ShotDirection.Rotation());
 			}
-			
 		}
 		else 
 		{
@@ -312,6 +381,11 @@ void AWokeAndShootCharacter::JumpHandler(float Val)
 	}
 }
 
+void AWokeAndShootCharacter::HandleDeath() 
+{
+	CharacterMovement->DisableMovement();
+}
+
 void AWokeAndShootCharacter::LookUpDown(float Rate)
 {
 	APawn::AddControllerPitchInput(Sensitivity * Rate);
@@ -335,32 +409,27 @@ void AWokeAndShootCharacter::LookLeftRight(float Rate)
 
 void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection) 
 {
-	CharacterMovement->AddImpulse(ImpulseDirection);
+
+	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	CharacterMovement->Launch(ImpulseDirection);
+	// if(!HasAuthority())
+	// {
+	// 	Server_RelayBoost(ImpulseDirection);
+	// 	GLog->Log("Applying Launch On Server");
+	//
+	// }
+	// else
+	// {
+	// 	// GLog->Log("Client Launched By Server");
+	// 	Multi_RelayBoost(ImpulseDirection);
+	// }
+
 }
 
-
-// void AWokeAndShootCharacter::AirStrafeHandler(float& DeltaTime) 
-// {
-// 	if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
-// 	{
-// 		float CurrentSpeed = FVector::DotProduct(GetVelocity(),WishDir);
-//
-// 		float MaxAccelDeltaTime = CharacterMovement->MaxAcceleration * DeltaTime;
-//
-// 		float AddSpeed = CharacterMovement->MaxWalkSpeed - CurrentSpeed;
-// 		AddSpeed = FMath::Min(MaxAccelDeltaTime, AddSpeed);
-// 		AddSpeed = FMath::Max(AddSpeed,0.f);
-//
-// 		FVector FinalImpulse = (WishDir * AddSpeed *0.8);
-//
-// 		CharacterMovement->AddImpulse(FinalImpulse,false);
-// 	}
-// 	else
-// 	{
-//		
-// 	}
-// }
-
+void AWokeAndShootCharacter::Landed(const FHitResult & Hit) 
+{
+	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
+}
 
 //Relay Pitch
 bool AWokeAndShootCharacter::Server_RelayPitch_Validate(float Pitch) 
@@ -370,9 +439,11 @@ bool AWokeAndShootCharacter::Server_RelayPitch_Validate(float Pitch)
 
 void AWokeAndShootCharacter::Server_RelayPitch_Implementation(float Pitch) 
 {
+
 	FRotator CameraRotation = FirstPersonCameraComponent->GetRelativeRotation();
 	CameraRotation.Pitch = Pitch;
 	FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
+	
 	Multi_RelayPitch(GetViewRotation().Pitch);
 }
 
@@ -394,39 +465,37 @@ void AWokeAndShootCharacter::Multi_RelayPitch_Implementation(float Pitch)
 
 
 //Relay Shot
-bool AWokeAndShootCharacter::Server_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+bool AWokeAndShootCharacter::Server_RelayShot_Validate(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
 {
 	return true;
 }
 
-void AWokeAndShootCharacter::Server_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+void AWokeAndShootCharacter::Server_RelayShot_Implementation(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
 {
-	AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
-	Projectile->SetOwner(this);
-	ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
-
+	// AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+	// Projectile->SetOwner(this);
+	// ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
 	//Bullet Impact + Tracer
 	if(BulletImpact)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletImpact, HitLocation, ShotDirection);
 	}
 
-	Multi_RelayShot(SpawnLocation, SpawnRotation, HitLocation, ShotDirection);
+	Multi_RelayShot(HitResult, SpawnLocation, SpawnRotation, HitLocation, ShotDirection);
 }
 
-bool AWokeAndShootCharacter::Multi_RelayShot_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+bool AWokeAndShootCharacter::Multi_RelayShot_Validate(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
 {
 	return true;	
 }
 
-void AWokeAndShootCharacter::Multi_RelayShot_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
+void AWokeAndShootCharacter::Multi_RelayShot_Implementation(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection) 
 {
 	if(!IsLocallyControlled())
 	{
-		AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
-		Projectile->SetOwner(this);
-		ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
-
+		// AActor* Projectile = GetWorld()->SpawnActor<AWokeAndShootProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+		// Projectile->SetOwner(this);
+		// ProjectileSceneComp = Projectile->FindComponentByClass<USceneComponent>();
 		//Bullet Impact + Tracer
 		if(BulletImpact)
 		{
@@ -455,4 +524,72 @@ bool AWokeAndShootCharacter::Server_RelayRightAxis_Validate(float MoveRightAxisP
 void AWokeAndShootCharacter::Server_RelayRightAxis_Implementation(float MoveRightAxisParam) 
 {
 	Client_MoveRightAxis = MoveRightAxisParam;
+}
+
+bool AWokeAndShootCharacter::Server_RelayHitScan_Validate(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint) 
+{
+	//LineTrace
+	FHitResult ServerHitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	bool bLineTrace = World->LineTraceSingleByChannel(ServerHitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
+	if(bLineTrace && ServerHitResult.GetActor())
+	{
+		// HandleDeath();
+		AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor());
+		if(Character)
+		{
+			Character->HealthComponent->ApplyDamage(100.f);
+			//Kill Player Hit On all Clients
+			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
+		}
+		
+	}
+}
+
+bool AWokeAndShootCharacter::Multi_RelayDamage_Validate(float Damage, AActor* HitActor) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AActor* HitActor) 
+{
+	// HandleDeath();
+	AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitActor);
+	if(Character)
+	{
+		Character->HealthComponent->ApplyDamage(Damage);
+	}
+	
+}
+
+
+
+bool AWokeAndShootCharacter::Server_RelayBoost_Validate(ABoostPad* HitBoostPad) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayBoost_Implementation(ABoostPad* HitBoostPad)
+{
+	HitBoostPad->BoostPlayers(this);
+	Multi_RelayBoost(HitBoostPad);
+}
+
+bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad) 
+{
+	if(!IsLocallyControlled())
+	{
+		HitBoostPad->BoostPlayers(this);
+	}
 }

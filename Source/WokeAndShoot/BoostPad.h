@@ -36,21 +36,28 @@ private:
 
 	bool WithinConeRange(FVector& PadLocation, FVector& HitActorLocation);
 
+	FVector GetImpulseDirection(FVector& ActorLocation);
+
+	void ApplyBoost(AWokeAndShootCharacter* Initiator);
+
 	// UFUNCTION(Server,Reliable,WithValidation)
-	// void Server_RelayBoost(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor );
-	// bool Server_RelayBoost_Validate(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor );
-	// void Server_RelayBoost_Implementation(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor);
+	// void Server_RelayBoost();
+	// bool Server_RelayBoost_Validate();
+	// void Server_RelayBoost_Implementation();
 
 	// UFUNCTION(NetMulticast,Reliable,WithValidation)
-	// void Multi_RelayBoost(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
-	// bool Multi_RelayBoost_Validate(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
-	// void Multi_RelayBoost_Implementation(FVector ActorLocation, AWokeAndShootCharacter* HitActor);
+	// void Multi_RelayBoost();
+	// bool Multi_RelayBoost_Validate();
+	// void Multi_RelayBoost_Implementation();
 
 	
 
 public:	
 	// Sets default values for this actor's properties
 	ABoostPad();
+
+	void BoostPlayers(AWokeAndShootCharacter* Initiator);
+	
 
 protected:
 	// Called when the game starts or when spawned

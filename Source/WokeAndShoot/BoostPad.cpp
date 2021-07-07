@@ -8,6 +8,7 @@
 #include "WokeAndShoot/WokeAndShootProjectile.h"
 #include "WokeAndShoot/WokeAndShootCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "MyCharacterMovementComponent.h"
 // Sets default values
 ABoostPad::ABoostPad()
 {
@@ -20,10 +21,16 @@ ABoostPad::ABoostPad()
 	RootComponent = CollisionComp;
 	PadMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoostPadMesh"));
 	PadMesh->AttachTo(CollisionComp);
-	if(HasAuthority())
-	{
-		PadMesh->OnComponentHit.AddDynamic(this, &ABoostPad::OnHit);
-	}
+	// if(HasAuthority())
+	// {
+	// 	PadMesh->OnComponentHit.AddDynamic(this, &ABoostPad::OnHit);
+	// }
+}
+
+void ABoostPad::BoostPlayers(AWokeAndShootCharacter* Initiator) 
+{
+	//ApplyBoost to Local
+	ApplyBoost(Initiator);
 }
 
 // Called when the game starts or when spawned
@@ -34,53 +41,6 @@ void ABoostPad::BeginPlay()
 
 void ABoostPad::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) 
 {
-	//Allow only bullets to activate
-	if(!OtherActor->IsA(AWokeAndShootProjectile::StaticClass()))
-		return;
-	
-	TArray<FHitResult> HitResults;
-	FVector SweepStart = GetActorLocation();
-	FVector SweepEnd = GetActorLocation();
-
-	FCollisionShape MyColSphere = FCollisionShape::MakeSphere(800.0f);
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
-
-	bool isHit = GetWorld()->SweepMultiByChannel(HitResults, SweepStart, SweepEnd, FQuat::Identity, ECC_GameTraceChannel3, MyColSphere, QueryParams);
-	if (isHit)
-	{
-		for(FHitResult HitResult : HitResults)
-		{
-			AWokeAndShootCharacter* HitActor = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
-			if (HitActor != nullptr)
-			{
-				FVector ActorLocation = HitActor->GetActorLocation();
-
-				if (CooldownList.Contains(HitActor)){continue;}
-				if(!WithinConeRange(SweepStart, ActorLocation)){continue;}
-
-				//Calculate Impulse direction+amount
-				FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
-				ImpulseDirection.Normalize();
-				ImpulseDirection*= BoostAmount;
-
-				//Apply Impulse
-				HitActor->DirectionalImpulse(ImpulseDirection);
-				//Add Cooldown
-				InitiateCooldown(HitActor);
-
-				
-
-
-				
-				//Debug Line for Forward Facing Line
-				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
-				// GLog->Log("Character Hit");
-			}
-		}
-	}
-	// DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
-	// GLog->Log("Fired");
 }
 
 // Called every frame
@@ -92,8 +52,8 @@ void ABoostPad::Tick(float DeltaTime)
 
 void ABoostPad::InitiateCooldown(AWokeAndShootCharacter* HitActor) 
 {
-	CooldownList.AddUnique(HitActor);
 	FTimerHandle TH_CooldownTimer;
+	CooldownList.AddUnique(HitActor);
 	TimerHandles.AddUnique(TH_CooldownTimer);
 
 	GetWorld()->GetTimerManager().SetTimer(TH_CooldownTimer,this,&ABoostPad::RemoveActorCD,BoostPadCooldown);	
@@ -124,36 +84,63 @@ bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation)
 		return true;
 }
 
-// bool ABoostPad::Server_RelayBoost_Validate(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor ) 
-// {
-// 	return true;
-// }
+FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation) 
+{
+	//Calculate Impulse direction+amount
+	FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
+	ImpulseDirection.Normalize();
+	ImpulseDirection*= BoostAmount;	
+	return ImpulseDirection;
+}
 
-// void ABoostPad::Server_RelayBoost_Implementation(FVector SweepStart, FVector ActorLocation, FVector ImpulseDirection, AWokeAndShootCharacter* HitActor ) 
-// {
-// 	if (CooldownList.Contains(HitActor)){return;}
-// 	if(!WithinConeRange(SweepStart, ActorLocation)){return;}
-// 	GLog->Log("Passed range and cd check");
-// 	//Apply Impulse
-// 	HitActor->DirectionalImpulse(ImpulseDirection);
-// 	//Add Cooldown
-// 	InitiateCooldown(HitActor);
-// 	Multi_RelayBoost(ActorLocation, HitActor);
+void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator) 
+{
+	TArray<FHitResult> HitResults;
+	FVector SweepStart = GetActorLocation();
+	FVector SweepEnd = GetActorLocation();
 
-// }
+	FCollisionShape MyColSphere = FCollisionShape::MakeSphere(800.0f);
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
 
-// bool ABoostPad::Multi_RelayBoost_Validate(FVector ActorLocation, AWokeAndShootCharacter* HitActor) 
-// {
-// 	return true;
-// }
+	bool isHit = GetWorld()->SweepMultiByChannel(HitResults, SweepStart, SweepEnd, FQuat::Identity, ECC_GameTraceChannel3, MyColSphere, QueryParams);
+	if (isHit)
+	{
+		for(FHitResult HitResult : HitResults)
+		{
+			// UE_LOG(LogTemp,Warning,TEXT("Actor Hit: %s"),*HitResult.GetActor()->GetName());
+			AWokeAndShootCharacter* HitActor = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
+			if (HitActor != nullptr)
+			{
+				
+				FVector ActorLocation = HitActor->GetActorLocation();
 
-// void ABoostPad::Multi_RelayBoost_Implementation(FVector ActorLocation, AWokeAndShootCharacter* HitActor) 
-// {
-// 	//Calculate Impulse direction+amount
-// 	FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
-// 	ImpulseDirection.Normalize();
-// 	ImpulseDirection*= BoostAmount;
+				if(CooldownList.Contains(HitActor)){continue;}
+				if(!WithinConeRange(SweepStart, ActorLocation)){continue;}
 
-// 	//Apply Impulse
-// 	HitActor->DirectionalImpulse(ImpulseDirection);
-// }
+				FVector ImpulseDirection = GetImpulseDirection(ActorLocation);
+				
+				if(HitActor->GetLocalRole() == ROLE_SimulatedProxy)
+				{
+					GLog->Log("BOOSTING SIMULATED PROXY");
+				}
+				if(!HitActor->IsLocallyControlled() && Initiator->IsLocallyControlled())
+				{
+					continue;
+				}
+				//Apply Impulse
+				HitActor->DirectionalImpulse(ImpulseDirection);
+				//Add Cooldown
+				InitiateCooldown(HitActor);
+
+
+				//Debug Line for Forward Facing Line
+				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
+				// GLog->Log("Character Hit");
+			}
+		}
+	}
+	// DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
+	// GLog->Log("Fired");
+}
+

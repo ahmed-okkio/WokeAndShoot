@@ -24,8 +24,16 @@ class AWokeAndShootProjectile : public AActor
 
 	void UpdateSpeed();
 
+private:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float Damage = 100.f;
+
 protected:
 	FVector ProjectileDefaultSize;
+
+
+
 public:
 	AWokeAndShootProjectile();
 
@@ -45,4 +53,3 @@ public:
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 };
-

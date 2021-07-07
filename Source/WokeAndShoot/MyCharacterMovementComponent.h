@@ -19,7 +19,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
 	float StrafeMultiplier = 0.1f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
-	//0.01 Closer to games like Valorant
+	//How sharp your velocity conforms to your forward vector
 	float StrafeSharpness = 0.01;
 	
 
