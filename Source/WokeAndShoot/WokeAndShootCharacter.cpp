@@ -1,23 +1,24 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "WokeAndShootCharacter.h"
-#include "WokeAndShootProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/InputSettings.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
-#include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "WokeAndShoot/WokeAndShootProjectile.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SceneComponent.h"
 #include "MyCharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CharacterComponenets/HealthComponent.h"
 #include "BoostPad.h"
+// #include "DrawDebugHelpers.h"
+
+//Potentially depricated
+// #include "GameFramework/CharacterMovementComponent.h"
+// #include "Particles/ParticleSystem.h"
+// #include "HeadMountedDisplayFunctionLibrary.h"
+// #include "WokeAndShootProjectile.h"
+// #include "GameFramework/InputSettings.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -31,57 +32,26 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
 	// Create a CameraComponent	
-	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
-	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	CreateCameraComp();
 
-	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
-	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
-	Mesh1P->SetOnlyOwnerSee(true);
-	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
-	Mesh1P->bCastDynamicShadow = false;
-	Mesh1P->CastShadow = false;
-	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
-	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+	//Create mesh components
+	CreateMeshComps();
 
-	// Create a gun mesh component
-	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
-	FP_Gun->SetOnlyOwnerSee(true);			// otherwise won't be visible in the multiplayer
-	FP_Gun->bCastDynamicShadow = false;
-	FP_Gun->CastShadow = false;
-	FP_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
-	FP_Gun->SetupAttachment(RootComponent);
-
-	//Create a third person body mesh component
-	TP_Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Third_Person Body"));
-	TP_Body->SetOwnerNoSee(true);
-	// TP_Body->SetOnlyOwnerSee(false);
-	TP_Body->SetupAttachment(RootComponent);	
-
-
-	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
-	FP_MuzzleLocation->SetupAttachment(FP_Gun,TEXT("Muzzle"));
-	FP_MuzzleLocation->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	//SetMuzzleLocation
+	SetMuzzleLocation();
 
 	//Set Character Movement Component
 	CharacterMovement = GetCharacterMovement();
 
 	//Set Health Component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	// Default offset from the character location for projectiles to spawn
-	// GunOffset = FVector(100.0f, 0.0f, 10.0f);
 }
 
 void AWokeAndShootCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-	if(HasAuthority())
-	{
-		// SetReplicateMovement(false);
-		// SetReplicates(true);
-	}
+
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
 }
@@ -89,17 +59,7 @@ void AWokeAndShootCharacter::BeginPlay()
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-	// if(!CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection == 0)
-	// {
-	// 	GLog->Log("IgnoredMovement");
-	// }
-	// else
-	// {
-	// 	GLog->Log("Not Ignored");
-	// }
-	// AirStrafeHandler(DeltaTime);
 }
-
 
 // Input
 void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -145,11 +105,7 @@ void AWokeAndShootCharacter::OnFire()
 
 	FVector EndPoint = ViewPointLocation + ViewPointRotation.Vector() * Range;
 
-	// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-	if (FP_MuzzleLocation == nullptr)
-	{
-		return;
-	}	
+	if (FP_MuzzleLocation == nullptr){return;}	
 
 	FVector SpawnLocation = FP_MuzzleLocation->GetComponentLocation();
 	FVector ShotDirection = FP_MuzzleLocation->GetComponentRotation().Vector();
@@ -159,7 +115,6 @@ void AWokeAndShootCharacter::OnFire()
 	if (World != nullptr)
 	{
 		//LineTrace
-		// bool bLineTrace = false;
 		FHitResult HitResult;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
@@ -204,10 +159,6 @@ void AWokeAndShootCharacter::OnFire()
 				if(!HasAuthority())
 				{
 					Server_RelayBoost(HitBoostPad);
-				}
-				else
-				{
-					// Multi_RelayBoost(HitBoostPad);
 				}
 			}
 
@@ -431,6 +382,15 @@ void AWokeAndShootCharacter::Landed(const FHitResult & Hit)
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
 }
 
+bool AWokeAndShootCharacter::IsDead() const
+{
+	if(HealthComponent->HealthPoints == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 //Relay Pitch
 bool AWokeAndShootCharacter::Server_RelayPitch_Validate(float Pitch) 
 {
@@ -592,4 +552,47 @@ void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(ABoostPad* HitBoost
 	{
 		HitBoostPad->BoostPlayers(this);
 	}
+}
+void AWokeAndShootCharacter::CreateCameraComp() 
+{
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+}
+
+void AWokeAndShootCharacter::CreateMeshComps() 
+{
+	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
+	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
+	Mesh1P->SetOnlyOwnerSee(true);
+	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
+	Mesh1P->bCastDynamicShadow = false;
+	Mesh1P->CastShadow = false;
+	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
+	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+
+	// Create a gun mesh component
+	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
+	FP_Gun->SetOnlyOwnerSee(true);
+				
+	// otherwise won't be visible in the multiplayer
+	FP_Gun->bCastDynamicShadow = false;
+	FP_Gun->CastShadow = false;
+	FP_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
+	FP_Gun->SetupAttachment(RootComponent);
+
+	//Create a third person body mesh component
+	TP_Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Third_Person Body"));
+	TP_Body->SetOwnerNoSee(true);
+	// TP_Body->SetOnlyOwnerSee(false);
+	TP_Body->SetupAttachment(RootComponent);	
+	
+}
+
+void AWokeAndShootCharacter::SetMuzzleLocation() 
+{
+	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
+	FP_MuzzleLocation->SetupAttachment(FP_Gun,TEXT("Muzzle"));
+	FP_MuzzleLocation->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 }

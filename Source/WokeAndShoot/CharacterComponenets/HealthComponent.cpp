@@ -37,6 +37,10 @@ void UHealthComponent::ApplyDamage(float Damage)
 {
 	float DamagedHealth = HealthPoints - Damage;
 	HealthPoints =	FMath::Max(DamagedHealth, 0.f);
+	if(HealthPoints == 0)
+	{
+		GetWorld()->GetTimerManager().SetTimer(KillTimerHandle, this, &UHealthComponent::KillActor, 3.f,false);
+	}
 }
 
 void UHealthComponent::ApplyHeal(float Heal) 
@@ -45,3 +49,8 @@ void UHealthComponent::ApplyHeal(float Heal)
 	HealthPoints =	FMath::Min(HealedHealth, MaxHealth);
 }
 
+
+void UHealthComponent::KillActor() 
+{
+	GetOwner()->Destroy();
+}

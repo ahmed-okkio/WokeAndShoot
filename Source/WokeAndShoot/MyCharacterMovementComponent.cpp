@@ -61,11 +61,11 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 			Velocity = NewVelocity.RotateAngleAxis(AimAtAngle*abs(MoveRightAxis),FVector (0,0,1));
 		}
 
-		const FVector Adjusted = NewVelocity * deltaTime * 0.5;
-		FHitResult Hit(1.f);
-		SafeMoveUpdatedComponent(Adjusted, MyCharacter->GetViewRotation(), true, Hit);
-	}
 
+	}
+	const FVector Adjusted = Velocity * deltaTime * 0.5;
+	FHitResult Hit(1.f);
+	SafeMoveUpdatedComponent(Adjusted, MyCharacter->GetViewRotation(), true, Hit);
 
 	
 	// UE_LOG(LogTemp,Warning,TEXT("________NEW LOG________"));

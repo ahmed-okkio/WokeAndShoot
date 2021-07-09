@@ -69,6 +69,10 @@ private:
 
 
 private:
+	//Initialization
+	void CreateCameraComp();
+	void CreateMeshComps();
+	void SetMuzzleLocation();
 
 	//AirStrafe Handler
 	void AirStrafeHandler(float& DeltaTime);
@@ -235,6 +239,9 @@ public:
 	virtual void Tick(float DeltaTime)override;
 
 	virtual void Landed(const FHitResult & Hit) override;
+
+	UFUNCTION(BlueprintPure)
+	bool IsDead() const;
 	
 
 };

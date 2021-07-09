@@ -11,7 +11,11 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class WOKEANDSHOOT_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
+private:
 
+	FTimerHandle KillTimerHandle;
+
+	 void KillActor();
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();

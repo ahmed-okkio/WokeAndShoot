@@ -124,7 +124,7 @@ void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator)
 				{
 					GLog->Log("BOOSTING SIMULATED PROXY");
 				}
-				if(!HitActor->IsLocallyControlled() && Initiator->IsLocallyControlled())
+				if(!HitActor->IsLocallyControlled() && Initiator->IsLocallyControlled() && !HasAuthority())
 				{
 					continue;
 				}
