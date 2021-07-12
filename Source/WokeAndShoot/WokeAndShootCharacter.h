@@ -65,7 +65,6 @@ private:
 
 	FVector WishDir;
 
-	FRotator CorrectedPivot;
 
 
 private:

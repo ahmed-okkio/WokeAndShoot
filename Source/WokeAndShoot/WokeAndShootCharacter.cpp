@@ -291,7 +291,7 @@ void AWokeAndShootCharacter::MoveForward(float Value)
 		// WishDir = InputAxis.RotateAngleAxis(FirstPersonCameraComponent->GetComponentRotation().Yaw,FVector (0,0,1));
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
-	else if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
+	else if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling && Client_MoveRightAxis != 0)
 	{
 		//Keep Movement going while air strafing without holding W
 		FVector VelocityNoZ = UKismetMathLibrary::LessLess_VectorRotator(GetVelocity(),GetActorRotation());

@@ -65,7 +65,9 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 	}
 	const FVector Adjusted = Velocity * deltaTime * 0.5;
 	FHitResult Hit(1.f);
-	SafeMoveUpdatedComponent(Adjusted, MyCharacter->GetViewRotation(), true, Hit);
+	FRotator NoPitchRotation = MyCharacter->GetViewRotation();
+	NoPitchRotation.Pitch = 0;
+	SafeMoveUpdatedComponent(Adjusted, NoPitchRotation, true, Hit);
 
 	
 	// UE_LOG(LogTemp,Warning,TEXT("________NEW LOG________"));
