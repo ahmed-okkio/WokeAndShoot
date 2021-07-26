@@ -3,6 +3,7 @@
 
 #include "HealthComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "WokeAndShoot/WokeAndShootGameMode.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -33,13 +34,13 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UHealthComponent::ApplyDamage(float Damage) 
+void UHealthComponent::ApplyDamage(float Damage, AController* Killer) 
 {
 	float DamagedHealth = HealthPoints - Damage;
 	HealthPoints =	FMath::Max(DamagedHealth, 0.f);
 	if(HealthPoints == 0)
 	{
-		GetWorld()->GetTimerManager().SetTimer(KillTimerHandle, this, &UHealthComponent::KillActor, 3.f,false);
+		KillActor(Killer);
 	}
 }
 
@@ -50,7 +51,15 @@ void UHealthComponent::ApplyHeal(float Heal)
 }
 
 
-void UHealthComponent::KillActor() 
+void UHealthComponent::KillActor(AController* Killer) 
 {
-	GetOwner()->Destroy();
+	APawn* PlayerPawn =  Cast<APawn>(GetOwner());
+	if(PlayerPawn == nullptr){return;}
+
+	AWokeAndShootGameMode* Gamemode = GetWorld()->GetAuthGameMode<AWokeAndShootGameMode>();
+	if(Gamemode != nullptr)
+	{
+		Gamemode->PawnKilled(PlayerPawn, Killer);
+	}
+	
 }

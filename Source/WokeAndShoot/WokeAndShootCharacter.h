@@ -141,7 +141,6 @@ public:
 
 protected:
 	virtual void BeginPlay();
-
 public:
 
 	UPROPERTY(EditAnywhere, Category=Camera)
@@ -172,6 +171,9 @@ public:
 	UCharacterMovementComponent* CharacterMovement;
 
 	bool bBoosting = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
+	FString Killer = TEXT("");
 
 
 protected:

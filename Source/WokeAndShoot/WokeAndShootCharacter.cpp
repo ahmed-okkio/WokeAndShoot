@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "CharacterComponenets/HealthComponent.h"
 #include "BoostPad.h"
+#include "WokeAndShootGameMode.h"
 // #include "DrawDebugHelpers.h"
 
 //Potentially depricated
@@ -54,6 +55,13 @@ void AWokeAndShootCharacter::BeginPlay()
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
+
+	AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode());
+    if(Gamemode != nullptr)
+    {
+        Gamemode->PlayersAlive++;
+        GLog->Log("NUMB"+FString::FromInt(Gamemode->PlayersAlive));
+    }
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -86,7 +94,7 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 
 void AWokeAndShootCharacter::CustomTakeDamage(float DamageAmount) 
 {
-	HealthComponent->ApplyDamage(DamageAmount);
+	HealthComponent->ApplyDamage(DamageAmount,GetController());
 }
 
 void AWokeAndShootCharacter::CustomTakeHeal(float HealAmount) 
@@ -128,7 +136,7 @@ void AWokeAndShootCharacter::OnFire()
 				AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
 				if(Character)
 				{
-					Character->HealthComponent->ApplyDamage(100.f);
+					Character->HealthComponent->ApplyDamage(100.f, Controller);
 					Multi_RelayDamage(100.f, HitResult.GetActor());
 				}
 			}
@@ -500,11 +508,10 @@ void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(UWorld* World, c
 	bool bLineTrace = World->LineTraceSingleByChannel(ServerHitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
 	if(bLineTrace && ServerHitResult.GetActor())
 	{
-		// HandleDeath();
 		AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor());
 		if(Character)
 		{
-			Character->HealthComponent->ApplyDamage(100.f);
+			Character->HealthComponent->ApplyDamage(100.f, GetController());
 			//Kill Player Hit On all Clients
 			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
 		}
@@ -520,10 +527,14 @@ bool AWokeAndShootCharacter::Multi_RelayDamage_Validate(float Damage, AActor* Hi
 void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AActor* HitActor) 
 {
 	// HandleDeath();
+	if(IsLocallyControlled())
+	{
+		return;
+	}
 	AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitActor);
 	if(Character)
 	{
-		Character->HealthComponent->ApplyDamage(Damage);
+		Character->HealthComponent->ApplyDamage(Damage,GetController());
 	}
 	
 }

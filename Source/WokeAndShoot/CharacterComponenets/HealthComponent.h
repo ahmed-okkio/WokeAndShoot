@@ -13,9 +13,9 @@ class WOKEANDSHOOT_API UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 private:
 
-	FTimerHandle KillTimerHandle;
+	
 
-	 void KillActor();
+	void KillActor(AController* Killer);
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();
@@ -34,7 +34,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void ApplyDamage(float Damage);
+	void ApplyDamage(float Damage, AController* Killer);
 
 	void ApplyHeal(float Heal);
 

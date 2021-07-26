@@ -20,7 +20,37 @@
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
 	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\DevTools\\\\MyReadWriteHelper.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\DevTools\\\\MyReadWriteHelper.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\FFAGameMode.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\FFAGameMode.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\First person shooter mini game.txt",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\GameComponents\\\\SpawnLocation.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\GameComponents\\\\SpawnLocation.h",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
@@ -31,6 +61,11 @@
 	},
 	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\MyCharacterMovementComponent.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\Structures\\\\PlayerData.h",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
@@ -76,6 +111,16 @@
 	},
 	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootHUD.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootPlayerController.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\WokeAndShootPlayerController.h",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
