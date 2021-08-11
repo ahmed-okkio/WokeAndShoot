@@ -2,12 +2,47 @@
 
 #include "WokeAndShootPlayerController.h"
 #include "WokeAndShoot/WokeAndShootGameMode.h"
+#include "WokeAndShoot/ServerComponents/MyPlayerState.h"
+#include "WokeAndShoot/GameComponents/DeathScreenWidget.h"
+#include "WokeAndShoot/WokeAndShootCharacter.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"
 
 
-void AWokeAndShootPlayerController::GameHasEnded() 
+// void AWokeAndShootPlayerController::GameHasEnded() 
+// {
+//     //Show game end UI
+// }
+
+void AWokeAndShootPlayerController::PlayerKilled() 
 {
-    //Show game end UI
+    // FString LastKilledBy = GetPlayerState<AMyPlayerState>()->LastKilledBy;
+    // UDeathScreenWidget* DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
+    // if(DeathScreen != nullptr)
+    // {
+    //     DeathScreen->KillerName = KilledBy;
+    //     DeathScreen->AddToViewport();
+    // }
+}
+
+void AWokeAndShootPlayerController::DisplayDeadWidget(FString KilledBy) 
+{
+    if(!IsLocalPlayerController()){return;}
+    DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
+    if(DeathScreen != nullptr)
+    {
+        DeathScreen->KillerName = KilledBy;
+        DeathScreen->AddToViewport();
+    }  
+}
+
+void AWokeAndShootPlayerController::PossessNewPawn(APawn* NewPawn) 
+{
+    if(!IsLocalPlayerController()){return;}
+    if(DeathScreen != nullptr)
+    {
+        DeathScreen->RemoveFromViewport();
+    }
+    Possess(NewPawn);
 }
 
 

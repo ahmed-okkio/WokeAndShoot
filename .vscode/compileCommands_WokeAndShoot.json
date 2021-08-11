@@ -45,6 +45,16 @@
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
 	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\GameComponents\\\\DeathScreenWidget.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\GameComponents\\\\DeathScreenWidget.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\GameComponents\\\\SpawnLocation.cpp",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
@@ -55,12 +65,27 @@
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
 	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\LastLeftOff.txt",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\MyCharacterMovementComponent.cpp",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},
 	{
 		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\MyCharacterMovementComponent.h",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\ServerComponents\\\\MyPlayerState.cpp",
+		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
+		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
+	},
+	{
+		"file": "S:\\\\Active Projects\\\\Unreal Projects\\\\WokeAndShoot\\\\Source\\\\WokeAndShoot\\\\ServerComponents\\\\MyPlayerState.h",
 		"command": "cl.exe @\"S:\\Active Projects\\Unreal Projects\\WokeAndShoot\\.vscode\\compileCommands_WokeAndShoot\\WokeAndShoot.208.rsp\"",
 		"directory": "S:\\Unreal Engine Versions\\UE_4.26\\Engine\\Source"
 	},

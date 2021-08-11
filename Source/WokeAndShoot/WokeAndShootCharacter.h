@@ -21,6 +21,7 @@ class AWokeAndShootCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
@@ -39,16 +40,15 @@ class AWokeAndShootCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, Category = Particles)
 	UParticleSystem* TracerParticle;
-	
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
-private:
 
 	UPROPERTY(EditAnywhere, Category = Animations)
 	UParticleSystem* BulletImpact;
-		//Shooting Range
+
+	//Shooting Range
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	float Range = 10000.f;
 
@@ -64,8 +64,6 @@ private:
 	USceneComponent* ProjectileSceneComp;
 
 	FVector WishDir;
-
-
 
 private:
 	//Initialization
@@ -134,50 +132,13 @@ private:
 	// void Multi_RelayDeath_Implementation(float Pitch);
 
 
-public:
-	AWokeAndShootCharacter(const class FObjectInitializer& ObjectInitializer);
 
-	
 
 protected:
+
 	virtual void BeginPlay();
-public:
 
-	UPROPERTY(EditAnywhere, Category=Camera)
-	float Sensitivity = 0.5;
-
-	/** Gun muzzle's offset from the characters location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector GunOffset;
-
-	/** Projectile class to spawn */
-	UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AWokeAndShootProjectile> ProjectileClass;
-
-	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
-
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
-
-	float Client_MoveRightAxis;
-	float Client_MoveForwardAxis;
-
-	UHealthComponent* HealthComponent;
-
-	//CharacterMovement
-	UCharacterMovementComponent* CharacterMovement;
-
-	bool bBoosting = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
-	FString Killer = TEXT("");
-
-
-protected:
-	
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 	//Update Tracer Source
 	void UpdateTracerSource(UParticleSystemComponent* TracerComponent, FVector DynamicTracerSource, FVector Target);
@@ -213,15 +174,49 @@ protected:
 	 */
 	void LookLeftRight(float Rate);
 
+public:
+
+	UPROPERTY(EditAnywhere, Category=Camera)
+	float Sensitivity = 0.5;
+
+	/** Gun muzzle's offset from the characters location */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	FVector GunOffset;
+
+	/** Projectile class to spawn */
+	UPROPERTY(EditDefaultsOnly, Category=Projectile)
+	TSubclassOf<class AWokeAndShootProjectile> ProjectileClass;
+
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSound;
+
+	/** AnimMontage to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* FireAnimation;
+
+	float Client_MoveRightAxis;
+	float Client_MoveForwardAxis;
+
+	UHealthComponent* HealthComponent;
+
+	//CharacterMovement
+	UCharacterMovementComponent* CharacterMovement;
+
+	bool bBoosting = false;
+
+	// FString Killer = TEXT("");
+
+	bool bIsDead = false;
 	
-	
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
+	FName KilledBy = "Unknown";
 
 
 public:
+
+	AWokeAndShootCharacter(const class FObjectInitializer& ObjectInitializer);
+
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
@@ -243,7 +238,6 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;
-	
 
 };
 

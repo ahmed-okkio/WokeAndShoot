@@ -10,28 +10,10 @@ AFFAGameMode::AFFAGameMode()
 {
     
 }
-void AFFAGameMode::PawnKilled(APawn* Pawn, AController* Killer) 
+void AFFAGameMode::PawnKilled(AController* Killed, AController* Killer) 
 {
-    AController* PlayerController = Pawn->GetController();
-    PlayersAlive--;
-	if(!GameOver && PlayerController != nullptr)
-	{
-        Respawn(PlayerController);
-	}
-    Super::PawnKilled(Pawn, Killer);
+    Super::PawnKilled(Killed, Killer);
 }
 
 
-void AFFAGameMode::Respawn(AController* PlayerController) 
-{
-     //Replace with optimal spawn algo
-    int32 SpawnIndex = FMath::RandRange(0,SpawnLocations.Num()-1);
-    FVector SpawnLocation = SpawnLocations[SpawnIndex];
-    FRotator SpawnRotation = FRotator(0,0,0);
-    FActorSpawnParameters SpawnParams;
-    AWokeAndShootCharacter* PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation);
-    if(PlayerCharacter != nullptr)
-    {
-        PlayerController->Possess(PlayerCharacter);
-    }
-}
+

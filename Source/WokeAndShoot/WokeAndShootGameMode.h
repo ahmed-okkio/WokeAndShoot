@@ -23,13 +23,15 @@ private:
 
 private:
 	UFUNCTION()
-	void DespawnBody(APawn* PlayerPawn);
+	void DespawnBody(AWokeAndShootPlayerController* KilledController);
+	void Respawn(AWokeAndShootPlayerController* PlayerController);
 protected:
 	bool GameOver = false;
 
 protected:
 
 	virtual void BeginPlay()override;
+	void UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController);
 	void UpdateScore(uint32 KillerID);
 	void RestartGame();
 public:
@@ -37,6 +39,8 @@ public:
 	int32 MaxScore = 2;
 	UPROPERTY(EditAnywhere)
 	bool ScoreLimit = true;
+	UPROPERTY(EditAnywhere)
+	float RespawnTimer = 3.f;
 
 	int32 PlayersAlive = 0;
 	int32 PlayersOnline = 0;
@@ -46,7 +50,7 @@ public:
 public:
 	AWokeAndShootGameMode();
 
-	virtual void PawnKilled(APawn* PlayerPawn, AController* Killer);
+	virtual void PawnKilled(AController* Killed, AController* Killer);
 };
 
 

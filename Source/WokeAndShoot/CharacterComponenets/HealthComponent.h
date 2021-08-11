@@ -15,7 +15,8 @@ private:
 
 	
 
-	void KillActor(AController* Killer);
+	void Server_KillActor(AController* Killer);
+	void Client_KillActor(AController* Killer);
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();

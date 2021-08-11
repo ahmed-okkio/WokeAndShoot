@@ -1,10 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "WokeAndShootGameMode.h"
 #include "GameFramework/GameSession.h"
+#include "UObject/ConstructorHelpers.h"
+#include "WokeAndShoot/ServerComponents/MyPlayerState.h"
 #include "WokeAndShootHUD.h"
 #include "WokeAndShootCharacter.h"
-#include "UObject/ConstructorHelpers.h"
+#include "WokeAndShootPlayerController.h"
+#include "WokeAndShootGameMode.h"
 
 AWokeAndShootGameMode::AWokeAndShootGameMode()
 	: Super()
@@ -17,21 +19,39 @@ AWokeAndShootGameMode::AWokeAndShootGameMode()
 	HUDClass = AWokeAndShootHUD::StaticClass();
 }
 
-void AWokeAndShootGameMode::PawnKilled(APawn* PlayerPawn, AController* Killer) 
+void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer) 
 {
+	AWokeAndShootPlayerController* KillerController = Cast<AWokeAndShootPlayerController>(Killer);
+	if(KillerController == nullptr){return;}
+	AWokeAndShootPlayerController* KilledController = Cast<AWokeAndShootPlayerController>(Killed);
+	if(KilledController == nullptr){return;}
 	//Despawning body
 	FTimerDelegate TimerDel;
-	TimerDel.BindUFunction(this,FName("DespawnBody"), PlayerPawn);
+	TimerDel.BindUFunction(this,FName("DespawnBody"), KilledController);
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
+	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer->GetUniqueID());
 }
 
 void AWokeAndShootGameMode::BeginPlay() 
 {
+	
+}
+
+void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController) 
+{
+	KilledController->GetPlayerState<AMyPlayerState>()->LastKilledBy = KillerController->PlayerName;
+
+	//Only for when playing on the server as a client
+	if(KilledController->HasAuthority())
+	{
+		KilledController->DisplayDeadWidget(KillerController->PlayerName);
+	}
 }
 
 void AWokeAndShootGameMode::UpdateScore(uint32 KillerID) 
 {
+	
 	int32 CurrentPlayerScore = Players.Find(KillerID)->Score;
 	CurrentPlayerScore++;
 	Players.Find(KillerID)->Score = CurrentPlayerScore;
@@ -60,8 +80,34 @@ void AWokeAndShootGameMode::RestartGame()
 	}
 }
 
-void AWokeAndShootGameMode::DespawnBody(APawn* PlayerPawn) 
+void AWokeAndShootGameMode::DespawnBody(AWokeAndShootPlayerController* Killed) 
 {
-	PlayerPawn->DetachFromControllerPendingDestroy();
-	PlayerPawn->Destroy();
+    PlayersAlive--;
+	if(APawn* KilledPawn = Killed->GetPawn())
+	{
+		KilledPawn->DetachFromControllerPendingDestroy();
+		KilledPawn->Destroy();
+	}
+	Respawn(Killed);
+}
+ 
+void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerController) 
+{
+	if(GameOver){return;}
+    //Replace with optimal spawn algo
+    int32 SpawnIndex = FMath::RandRange(0,SpawnLocations.Num()-1);
+    FVector SpawnLocation = SpawnLocations[SpawnIndex];
+    FRotator SpawnRotation = FRotator(0,0,0);
+    FActorSpawnParameters SpawnParams;
+    AWokeAndShootCharacter* PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation);
+    if(PlayerCharacter != nullptr)
+    {
+        PlayerController->GetPlayerState<AMyPlayerState>()->NewPawn = PlayerCharacter;
+		
+		//Only for when playing on the server as a client
+		if(PlayerController->HasAuthority())
+		{
+			PlayerController->PossessNewPawn(PlayerCharacter);
+		}
+    }
 }

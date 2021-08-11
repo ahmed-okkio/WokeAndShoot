@@ -60,7 +60,6 @@ void AWokeAndShootCharacter::BeginPlay()
     if(Gamemode != nullptr)
     {
         Gamemode->PlayersAlive++;
-        GLog->Log("NUMB"+FString::FromInt(Gamemode->PlayersAlive));
     }
 }
 
@@ -143,6 +142,7 @@ void AWokeAndShootCharacter::OnFire()
 		}
 		else
 		{
+			// GLog->Log("Executing Server_RelayHitScan");
 			Server_RelayHitScan(World, ViewPointLocation, EndPoint);
 		}
 
@@ -407,11 +407,6 @@ bool AWokeAndShootCharacter::Server_RelayPitch_Validate(float Pitch)
 
 void AWokeAndShootCharacter::Server_RelayPitch_Implementation(float Pitch) 
 {
-
-	FRotator CameraRotation = FirstPersonCameraComponent->GetRelativeRotation();
-	CameraRotation.Pitch = Pitch;
-	FirstPersonCameraComponent->SetRelativeRotation(CameraRotation);
-	
 	Multi_RelayPitch(GetViewRotation().Pitch);
 }
 
@@ -501,6 +496,7 @@ bool AWokeAndShootCharacter::Server_RelayHitScan_Validate(UWorld* World, const F
 
 void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint) 
 {
+	// GLog->Log("Executing ApplyDamage");
 	//LineTrace
 	FHitResult ServerHitResult;
 	FCollisionQueryParams Params;
@@ -511,7 +507,7 @@ void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(UWorld* World, c
 		AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor());
 		if(Character)
 		{
-			Character->HealthComponent->ApplyDamage(100.f, GetController());
+
 			//Kill Player Hit On all Clients
 			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
 		}
@@ -527,6 +523,10 @@ bool AWokeAndShootCharacter::Multi_RelayDamage_Validate(float Damage, AActor* Hi
 void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AActor* HitActor) 
 {
 	// HandleDeath();
+	if(HasAuthority())
+	{
+
+	}
 	if(IsLocallyControlled())
 	{
 		return;

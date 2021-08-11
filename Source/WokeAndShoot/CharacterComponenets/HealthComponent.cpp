@@ -4,6 +4,7 @@
 #include "HealthComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "WokeAndShoot/WokeAndShootGameMode.h"
+#include "WokeAndShoot/WokeAndShootPlayerController.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -20,7 +21,6 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// ...
 	
 }
@@ -40,7 +40,27 @@ void UHealthComponent::ApplyDamage(float Damage, AController* Killer)
 	HealthPoints =	FMath::Max(DamagedHealth, 0.f);
 	if(HealthPoints == 0)
 	{
-		KillActor(Killer);
+		// if(GetOwnerRole() == ROLE_AutonomousProxy)
+		// {
+
+		// 	GLog->Log("AUTO PROXY");
+		// }
+		// if(GetOwnerRole() == ROLE_Authority)
+		// {
+
+		// 	GLog->Log("AUTHORITY");
+		// }
+		// if(GetOwnerRole() == ROLE_SimulatedProxy)
+		// {
+
+		// 	GLog->Log("SIMULATED PROXY");
+		// }
+		if(Killer)
+		{
+			// GLog->Log(Killer->GetName());
+		}
+		Server_KillActor(Killer);
+		Client_KillActor(Killer);
 	}
 }
 
@@ -51,15 +71,31 @@ void UHealthComponent::ApplyHeal(float Heal)
 }
 
 
-void UHealthComponent::KillActor(AController* Killer) 
+void UHealthComponent::Server_KillActor(AController* Killer) 
 {
+	if(GetOwnerRole() != ROLE_Authority){return;}
 	APawn* PlayerPawn =  Cast<APawn>(GetOwner());
 	if(PlayerPawn == nullptr){return;}
-
+	AController* PlayerController = PlayerPawn->GetController();
+	if(PlayerController == nullptr){return;}
 	AWokeAndShootGameMode* Gamemode = GetWorld()->GetAuthGameMode<AWokeAndShootGameMode>();
 	if(Gamemode != nullptr)
 	{
-		Gamemode->PawnKilled(PlayerPawn, Killer);
+		Gamemode->PawnKilled(PlayerController, Killer);
+	}	
+}
+
+void UHealthComponent::Client_KillActor(AController* Killer) 
+{
+	AWokeAndShootPlayerController* KilledPlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()->GetInstigatorController());
+	if(KilledPlayerController == nullptr){return;}
+	if(KilledPlayerController->IsLocalController())
+	{
+		KilledPlayerController->PlayerKilled();
+		APawn* PlayerPawn =  Cast<APawn>(GetOwner());
+		if(PlayerPawn != nullptr)
+		{
+			// PlayerPawn->DetachFromControllerPendingDestroy();
+		}
 	}
-	
 }

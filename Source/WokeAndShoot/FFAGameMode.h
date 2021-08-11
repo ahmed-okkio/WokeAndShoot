@@ -16,10 +16,10 @@ class WOKEANDSHOOT_API AFFAGameMode : public AWokeAndShootGameMode
 private:
 
 private:
-	void Respawn(AController* PlayerController);
+
 public:
 public:
 	AFFAGameMode();
-	virtual void PawnKilled(APawn* Pawn, AController* Killer) override;
+	virtual void PawnKilled(AController* Killed, AController* Killer) override;
 
 };
