@@ -65,16 +65,18 @@ private:
 	FVector WishDir;
 
 private:
-	//Initialization
+	// Initialization
 	void CreateCameraComp();
 	void CreateMeshComps();
 	void SetMuzzleLocation();
 
-	//AirStrafe Handler
-	void AirStrafeHandler(float& DeltaTime);
+	// Actions
+	void PlayShotSound();
+	void PlayShotAnimation();
+	void PlayBulletImpactAnimation(FVector HitLocation, FRotator ImpactRotation);
+	void HitScan(FHitResult& HitResult, FCollisionQueryParams& Params, FVector& StartingLocation, FVector&  EndLocation);
 
-
-	//Network
+	// Network
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_RelayPitch(float Pitch);
 	bool Server_RelayPitch_Validate(float Pitch);
@@ -86,14 +88,14 @@ private:
 	void Multi_RelayPitch_Implementation(float Pitch);
 
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_RelayShot(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
-	bool Server_RelayShot_Validate(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
-	void Server_RelayShot_Implementation(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	void Server_RelayBulletImpact(FVector HitLocation, FRotator ShotDirection);
+	bool Server_RelayBulletImpact_Validate(FVector HitLocation, FRotator ShotDirection);
+	void Server_RelayBulletImpact_Implementation(FVector HitLocation, FRotator ShotDirection);
 
 	UFUNCTION(NetMulticast,Reliable,WithValidation)
-	void Multi_RelayShot(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
-	bool Multi_RelayShot_Validate(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
-	void Multi_RelayShot_Implementation(FHitResult HitResult, FVector SpawnLocation, FRotator SpawnRotation, FVector HitLocation, FRotator ShotDirection);
+	void Multi_RelayBulletImpact(FVector HitLocation, FRotator ShotDirection);
+	bool Multi_RelayBulletImpact_Validate(FVector HitLocation, FRotator ShotDirection);
+	void Multi_RelayBulletImpact_Implementation(FVector HitLocation, FRotator ShotDirection);
 
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_RelayForwardAxis(float MoveForwardAxisParam);
@@ -106,9 +108,9 @@ private:
 	void Server_RelayRightAxis_Implementation(float MoveRightAxisParam);
 
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_RelayHitScan(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint);
-	bool Server_RelayHitScan_Validate(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint);
-	void Server_RelayHitScan_Implementation(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint);
+	void Server_RelayHitScan(const FVector& ViewPointLocation, const FVector& EndPoint);
+	bool Server_RelayHitScan_Validate(const FVector& ViewPointLocation, const FVector& EndPoint);
+	void Server_RelayHitScan_Implementation(const FVector& ViewPointLocation, const FVector& EndPoint);
 
 	UFUNCTION(NetMulticast,Reliable,WithValidation)
 	void Multi_RelayDamage(float Damage, AActor* HitActor);
@@ -138,9 +140,6 @@ protected:
 	virtual void BeginPlay();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-
-	//Update Tracer Source
-	void UpdateTracerSource(UParticleSystemComponent* TracerComponent, FVector DynamicTracerSource, FVector Target);
 
 	//Get ViewPoint Rotation and Location
 	void GetViewPointRotLoc(FVector &ViewPointLocation, FRotator &ViewPointRotation) const;
@@ -223,10 +222,6 @@ public:
 	/** Returns HealthComponent subobject **/
 	UHealthComponent* GetHealthComponent() const {return HealthComponent; }
 
-	void CustomTakeDamage(float DamageAmount);
-
-	void CustomTakeHeal(float HealAmount);
-
 	//Apply impulse to a direction
 	void DirectionalImpulse(FVector ImpulseDirection);
 
@@ -237,6 +232,12 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;
+
+public:
+///////////////////////////////////////////////////////////////////////////////////////
+// Debug toggles
+	UPROPERTY(EditAnywhere)
+	bool Debug_OnFire = false;
 
 };
 
