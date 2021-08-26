@@ -11,13 +11,12 @@
 // #include "Engine/World.h"
 
 
-//PhysFalling Override
+// PhysFalling Override
 void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iterations) 
 {
     Super::PhysFalling(deltaTime, Iterations);
 
-
-//Air Strafe Implementation
+	// Air Strafe Implementation
 	AWokeAndShootCharacter* MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner());
 	if(MyCharacter == nullptr)
 	{
@@ -46,7 +45,6 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 
 		FVector NewVelocity = Velocity  + (WishDir * AddSpeed * StrafeMultiplier);
 
-
 		float AimAtAngle = FMath::RadiansToDegrees(FVector::DotProduct(NormalVelocity, ForwardVector));
 		float PositiveOrNegative = FVector::DotProduct(FVector::CrossProduct(NormalVelocity, ForwardVector),FVector(0,0,1));
 		AimAtAngle *= PositiveOrNegative;
@@ -54,7 +52,6 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 		//Applying Strafe Sharpness Modifier
 		AimAtAngle *= StrafeSharpness;
 
-		
 		if(AimAtAngle)
 		{
 			bIgnoreClientMovementErrorChecksAndCorrection = true;
@@ -63,6 +60,7 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 
 
 	}
+	
 	const FVector Adjusted = Velocity * deltaTime * 0.5;
 	FHitResult Hit(1.f);
 	FRotator NoPitchRotation = MyCharacter->GetViewRotation();

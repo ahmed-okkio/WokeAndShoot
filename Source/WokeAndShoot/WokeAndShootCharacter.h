@@ -236,7 +236,7 @@ public:
 public:
 ///////////////////////////////////////////////////////////////////////////////////////
 // Debug toggles
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug Mode")
 	bool Debug_OnFire = false;
 
 };
