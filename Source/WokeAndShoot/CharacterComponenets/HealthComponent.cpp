@@ -50,11 +50,10 @@ void UHealthComponent::ApplyDamage(float Damage, AController* Killer)
 
 		// 	GLog->Log("AUTHORITY");
 		// }
-		// if(GetOwnerRole() == ROLE_SimulatedProxy)
-		// {
-
-		// 	GLog->Log("SIMULATED PROXY");
-		// }
+		if(GetOwnerRole() == ROLE_SimulatedProxy)
+		{
+			
+		}
 		if(Killer)
 		{
 			// GLog->Log(Killer->GetName());

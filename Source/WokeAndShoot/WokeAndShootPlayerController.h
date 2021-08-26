@@ -36,5 +36,5 @@ public:
 	void PlayerKilled();
 
 	void DisplayDeadWidget(FString KilledBy);
-	void PossessNewPawn(APawn* NewPawn);
+	void ClearDeadWidget();
 };

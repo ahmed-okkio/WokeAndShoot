@@ -30,6 +30,6 @@ void AMyPlayerState::OnRep_Respawn()
 {
     if(AWokeAndShootPlayerController* PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
-        PlayerController->PossessNewPawn(NewPawn);
+        PlayerController->ClearDeadWidget();
     }
 }

@@ -107,7 +107,8 @@ void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerControl
 		//Only for when playing on the server as a client
 		if(PlayerController->HasAuthority())
 		{
-			PlayerController->PossessNewPawn(PlayerCharacter);
+			PlayerController->Possess(PlayerCharacter);
+			PlayerController->ClearDeadWidget();
 		}
     }
 }

@@ -35,14 +35,13 @@ void AWokeAndShootPlayerController::DisplayDeadWidget(FString KilledBy)
     }  
 }
 
-void AWokeAndShootPlayerController::PossessNewPawn(APawn* NewPawn) 
+void AWokeAndShootPlayerController::ClearDeadWidget() 
 {
     if(!IsLocalPlayerController()){return;}
     if(DeathScreen != nullptr)
     {
         DeathScreen->RemoveFromViewport();
     }
-    Possess(NewPawn);
 }
 
 

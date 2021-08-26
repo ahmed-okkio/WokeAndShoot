@@ -135,7 +135,6 @@ void AWokeAndShootCharacter::OnFire()
 				AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
 				if(Character)
 				{
-					Character->HealthComponent->ApplyDamage(100.f, Controller);
 					Multi_RelayDamage(100.f, HitResult.GetActor());
 				}
 			}
@@ -489,6 +488,7 @@ void AWokeAndShootCharacter::Server_RelayRightAxis_Implementation(float MoveRigh
 	Client_MoveRightAxis = MoveRightAxisParam;
 }
 
+//Hitscan
 bool AWokeAndShootCharacter::Server_RelayHitScan_Validate(UWorld* World, const FVector& ViewPointLocation, const FVector& EndPoint) 
 {
 	return true;
@@ -507,7 +507,6 @@ void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(UWorld* World, c
 		AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor());
 		if(Character)
 		{
-
 			//Kill Player Hit On all Clients
 			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
 		}
@@ -525,11 +524,6 @@ void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AAct
 	// HandleDeath();
 	if(HasAuthority())
 	{
-
-	}
-	if(IsLocallyControlled())
-	{
-		return;
 	}
 	AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitActor);
 	if(Character)
