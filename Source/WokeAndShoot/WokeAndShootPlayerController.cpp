@@ -7,28 +7,23 @@
 #include "WokeAndShoot/WokeAndShootCharacter.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"
 
-
-// void AWokeAndShootPlayerController::GameHasEnded() 
-// {
-//     //Show game end UI
-// }
-
-void AWokeAndShootPlayerController::PlayerKilled() 
+void AWokeAndShootPlayerController::BeginPlay() 
 {
-    // FString LastKilledBy = GetPlayerState<AMyPlayerState>()->LastKilledBy;
-    // UDeathScreenWidget* DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
-    // if(DeathScreen != nullptr)
-    // {
-    //     DeathScreen->KillerName = KilledBy;
-    //     DeathScreen->AddToViewport();
-    // }
+    Super::BeginPlay();
+    AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode());
+    if(Gamemode != nullptr)
+    {
+        PlayerInformation CurrentPlayer {PlayerName};
+        Gamemode->PlayersOnline++;
+        Gamemode->Players.Add(GetUniqueID(),CurrentPlayer);
+    }
 }
 
 void AWokeAndShootPlayerController::DisplayDeadWidget(FString KilledBy) 
 {
     if(!IsLocalPlayerController()){return;}
-    DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
-    if(DeathScreen != nullptr)
+    
+    if(DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass)))
     {
         DeathScreen->KillerName = KilledBy;
         DeathScreen->AddToViewport();
@@ -44,36 +39,16 @@ void AWokeAndShootPlayerController::ClearDeadWidget()
     }
 }
 
-
 AWokeAndShootPlayerController::AWokeAndShootPlayerController() 
 {
     PlayerName = MyReadWriteHelper::LoadFileToString("Username.cfg","UserSettings");
 }
 
-AWokeAndShootPlayerController::~AWokeAndShootPlayerController() 
-{
-     
-}
-
-
-
-void AWokeAndShootPlayerController::BeginPlay() 
-{
-    Super::BeginPlay();
-    AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode());
-    if(Gamemode != nullptr)
-    {
-        PlayerInformation CurrentPlayer {PlayerName};
-        Gamemode->PlayersOnline++;
-        Gamemode->Players.Add(GetUniqueID(),CurrentPlayer);
-    }
-}
-
 void AWokeAndShootPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason) 
 {
     Super::EndPlay(EndPlayReason);
-    AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode());
-    if(Gamemode != nullptr)
+
+    if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
     {
         Gamemode->PlayersOnline--;
         Gamemode->Players.Remove(GetUniqueID());
