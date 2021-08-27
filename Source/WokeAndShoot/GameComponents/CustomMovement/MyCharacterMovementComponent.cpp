@@ -5,26 +5,23 @@
 #include "MyCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/InputSettings.h"
-#include "WokeAndShootCharacter.h"
+#include "../Character/WokeAndShootCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
-// #include "GameFramework/PlayerController.h"
-// #include "Engine/World.h"
 
 
-//PhysFalling Override
+// PhysFalling Override
 void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iterations) 
 {
     Super::PhysFalling(deltaTime, Iterations);
 
-
-//Air Strafe Implementation
+	// Air Strafe Implementation
 	AWokeAndShootCharacter* MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner());
 	if(MyCharacter == nullptr)
 	{
 		return;
 	}
 
-	//Player Keyboard Inputs
+	// Player Keyboard Inputs
 	float MoveRightAxis = MyCharacter->Client_MoveRightAxis;
 	float MoveForwardAxis = MyCharacter->Client_MoveForwardAxis;
 	
@@ -46,32 +43,34 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 
 		FVector NewVelocity = Velocity  + (WishDir * AddSpeed * StrafeMultiplier);
 
-
 		float AimAtAngle = FMath::RadiansToDegrees(FVector::DotProduct(NormalVelocity, ForwardVector));
 		float PositiveOrNegative = FVector::DotProduct(FVector::CrossProduct(NormalVelocity, ForwardVector),FVector(0,0,1));
 		AimAtAngle *= PositiveOrNegative;
 
-		//Applying Strafe Sharpness Modifier
+		// Applying Strafe Sharpness Modifier
 		AimAtAngle *= StrafeSharpness;
 
-		
 		if(AimAtAngle)
 		{
 			bIgnoreClientMovementErrorChecksAndCorrection = true;
 			Velocity = NewVelocity.RotateAngleAxis(AimAtAngle*abs(MoveRightAxis),FVector (0,0,1));
 		}
 
-
+		// Debug mode
+		if(Debug_AirStrafing)
+		{
+			UE_LOG(LogTemp,Warning,TEXT("________AIRSTRAFE LOG________"));
+			UE_LOG(LogTemp,Warning,TEXT("VELOCITY: %s"),*Velocity.ToString());
+			UE_LOG(LogTemp,Warning,TEXT("WISHDIR: %s"),*WishDir.ToString());
+			UE_LOG(LogTemp,Warning,TEXT("SPEED: %f"),Velocity.Size2D());	
+			UE_LOG(LogTemp,Warning,TEXT("________AIRSTRAFE LOG________"));
+		}
 	}
+
 	const FVector Adjusted = Velocity * deltaTime * 0.5;
 	FHitResult Hit(1.f);
 	FRotator NoPitchRotation = MyCharacter->GetViewRotation();
 	NoPitchRotation.Pitch = 0;
 	SafeMoveUpdatedComponent(Adjusted, NoPitchRotation, true, Hit);
 
-	
-	// UE_LOG(LogTemp,Warning,TEXT("________NEW LOG________"));
-	// UE_LOG(LogTemp,Warning,TEXT("VELOCITY: %s"),*Velocity.ToString());
-	// UE_LOG(LogTemp,Warning,TEXT("WISHDIR: %s"),*WishDir.ToString());
-	// UE_LOG(LogTemp,Warning,TEXT("SPEED: %f"),Velocity.Size2D());	
 }

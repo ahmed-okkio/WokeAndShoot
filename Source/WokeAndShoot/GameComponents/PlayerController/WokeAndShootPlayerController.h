@@ -6,9 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "WokeAndShootPlayerController.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class WOKEANDSHOOT_API AWokeAndShootPlayerController : public APlayerController
 {
@@ -17,24 +15,19 @@ class WOKEANDSHOOT_API AWokeAndShootPlayerController : public APlayerController
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UDeathScreenWidget> DeathScreenClass;
-
 	UDeathScreenWidget* DeathScreen = nullptr;
 
 private:
 	AWokeAndShootPlayerController();
-	~AWokeAndShootPlayerController();
-
 
 protected:
 	virtual void BeginPlay()override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
 	FString PlayerName = TEXT("Player");
-	// FString KilledBy = TEXT("Unknown");
-public:
-	// void GameHasEnded();
-	void PlayerKilled();
 
+public:
 	void DisplayDeadWidget(FString KilledBy);
 	void ClearDeadWidget();
 };

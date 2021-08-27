@@ -15,8 +15,8 @@ class WOKEANDSHOOT_API ASpawnLocation : public APlayerStart
 	GENERATED_BODY()
 	
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
+	
 public:
 	ASpawnLocation(const FObjectInitializer& ObjectInitializer);
 

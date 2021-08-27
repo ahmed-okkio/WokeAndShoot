@@ -2,10 +2,10 @@
 
 #include "GameFramework/GameSession.h"
 #include "UObject/ConstructorHelpers.h"
-#include "WokeAndShoot/ServerComponents/MyPlayerState.h"
-#include "WokeAndShootHUD.h"
-#include "WokeAndShootCharacter.h"
-#include "WokeAndShootPlayerController.h"
+#include "WokeAndShoot/ServerComponents/PlayerState/MyPlayerState.h"
+#include "../../../GameComponents/Widgets/WokeAndShootHUD.h"
+#include "../../../GameComponents/Character/WokeAndShootCharacter.h"
+#include "../../../GameComponents/PlayerController/WokeAndShootPlayerController.h"
 #include "WokeAndShootGameMode.h"
 
 AWokeAndShootGameMode::AWokeAndShootGameMode()
@@ -23,12 +23,15 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 {
 	AWokeAndShootPlayerController* KillerController = Cast<AWokeAndShootPlayerController>(Killer);
 	if(KillerController == nullptr){return;}
+
 	AWokeAndShootPlayerController* KilledController = Cast<AWokeAndShootPlayerController>(Killed);
 	if(KilledController == nullptr){return;}
+
 	//Despawning body
 	FTimerDelegate TimerDel;
 	TimerDel.BindUFunction(this,FName("DespawnBody"), KilledController);
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
+
 	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer->GetUniqueID());
 }
@@ -51,10 +54,11 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 
 void AWokeAndShootGameMode::UpdateScore(uint32 KillerID) 
 {
-	
 	int32 CurrentPlayerScore = Players.Find(KillerID)->Score;
 	CurrentPlayerScore++;
+
 	Players.Find(KillerID)->Score = CurrentPlayerScore;
+
 	if(ScoreLimit && CurrentPlayerScore == MaxScore)
 	{
 		GameOver = true;
@@ -67,12 +71,9 @@ void AWokeAndShootGameMode::RestartGame()
 	for( FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator )
 	{
 		APlayerController* PlayerController = Iterator->Get();
-		if(PlayerController == nullptr)
-		{
-			return;
-		}
-		APawn* PlayerPawn = PlayerController->GetPawn();
-		if(PlayerPawn != nullptr)
+		if(PlayerController == nullptr){return;}
+
+		if(APawn* PlayerPawn = PlayerController->GetPawn())
 		{
 			PlayerPawn->DetachFromControllerPendingDestroy();
 			PlayerPawn->Destroy();
@@ -83,24 +84,27 @@ void AWokeAndShootGameMode::RestartGame()
 void AWokeAndShootGameMode::DespawnBody(AWokeAndShootPlayerController* Killed) 
 {
     PlayersAlive--;
+
 	if(APawn* KilledPawn = Killed->GetPawn())
 	{
 		KilledPawn->DetachFromControllerPendingDestroy();
 		KilledPawn->Destroy();
 	}
+
 	Respawn(Killed);
 }
  
 void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerController) 
 {
 	if(GameOver){return;}
+
     //Replace with optimal spawn algo
     int32 SpawnIndex = FMath::RandRange(0,SpawnLocations.Num()-1);
     FVector SpawnLocation = SpawnLocations[SpawnIndex];
     FRotator SpawnRotation = FRotator(0,0,0);
     FActorSpawnParameters SpawnParams;
-    AWokeAndShootCharacter* PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation);
-    if(PlayerCharacter != nullptr)
+
+    if(AWokeAndShootCharacter* PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation))
     {
         PlayerController->GetPlayerState<AMyPlayerState>()->NewPawn = PlayerCharacter;
 		

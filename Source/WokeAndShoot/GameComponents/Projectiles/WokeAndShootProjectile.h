@@ -13,7 +13,7 @@ UCLASS(config=Game)
 class AWokeAndShootProjectile : public AActor
 {
 	GENERATED_BODY()
-
+private:
 	/** Sphere collision component */
 	UPROPERTY(VisibleDefaultsOnly, Category=Projectile)
 	USphereComponent* CollisionComp;
@@ -22,17 +22,18 @@ class AWokeAndShootProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
-	void UpdateSpeed();
-
-private:
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float Damage = 100.f;
 
+private:
+	void UpdateSpeed();
+
 protected:
 	FVector ProjectileDefaultSize;
-
-
+	
+public:
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* ProjectileStaticMesh;
 
 public:
 	AWokeAndShootProjectile();
@@ -43,9 +44,6 @@ public:
 
 	//Return Owner
 	AActor* GetOwnerActor();
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* ProjectileStaticMesh;
 
 	UStaticMeshComponent* GetProjectileMesh();
 	/** Returns CollisionComp subobject **/

@@ -30,4 +30,10 @@ public:
 	virtual void PhysFalling(float deltaTime, int32 Iterations) override;
 
 #pragma endregion
+public:
+///////////////////////////////////////////////////////////////////////////////////////
+// Debug toggles
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug Mode")
+	bool Debug_AirStrafing = false;
 };

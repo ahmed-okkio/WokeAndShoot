@@ -13,11 +13,13 @@ UCLASS()
 class WOKEANDSHOOT_API AMyPlayerState : public APlayerState
 {
 	GENERATED_BODY()
+
 private:
 	UFUNCTION()
 	void OnRep_KilledBy();
 	UFUNCTION()
 	void OnRep_Respawn();
+
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_KilledBy )
 	FString LastKilledBy = "";
@@ -25,7 +27,5 @@ public:
 	APawn* NewPawn = nullptr;
 
 public:
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
-
 };

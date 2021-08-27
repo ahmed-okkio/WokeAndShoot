@@ -12,33 +12,20 @@ class WOKEANDSHOOT_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 private:
-
-	
-
 	void Server_KillActor(AController* Killer);
-	void Client_KillActor(AController* Killer);
-public:	
-	// Sets default values for this component's properties
-	UHealthComponent();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
-	float HealthPoints;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
-	float MaxHealth = 100.f;
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	float HealthPoints;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	float MaxHealth = 100.f;	
+
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	UHealthComponent();
 	void ApplyDamage(float Damage, AController* Killer);
-
-	void ApplyHeal(float Heal);
-
-
-		
+	void ApplyHeal(float Heal);	
 };

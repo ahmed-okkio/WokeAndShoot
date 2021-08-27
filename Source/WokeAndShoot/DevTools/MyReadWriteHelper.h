@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 
-/**
- * 
- */
 class WOKEANDSHOOT_API MyReadWriteHelper
 {
 public:

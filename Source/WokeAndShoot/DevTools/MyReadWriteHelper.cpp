@@ -17,15 +17,19 @@ FString MyReadWriteHelper::LoadFileToString(FString FileName, FString FileArea)
     FString Directory = FPaths::ProjectContentDir()+ "/" + FileArea;
     IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
     FString Result = TEXT("No Result");
+
     if(PlatformFile.CreateDirectory(*Directory))
     {
         FString FilePath = Directory + "/"+ FileName;
+
         if(!FFileHelper::LoadFileToString(Result, *FilePath))
         {
             FFileHelper::SaveStringToFile(TEXT("PlayerName"),*FilePath);
             FFileHelper::LoadFileToString(Result, *FilePath);
+            
             return Result;
         }
     }
+
     return Result;
 }
