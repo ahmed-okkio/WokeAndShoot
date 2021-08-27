@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WokeAndShootGameMode.h"
+#include "../Base/WokeAndShootGameMode.h"
 #include "FFAGameMode.generated.h"
 
 /**

@@ -3,9 +3,9 @@
 #include "GameFramework/GameSession.h"
 #include "UObject/ConstructorHelpers.h"
 #include "WokeAndShoot/ServerComponents/MyPlayerState.h"
-#include "WokeAndShootHUD.h"
-#include "WokeAndShootCharacter.h"
-#include "WokeAndShootPlayerController.h"
+#include "../../../GameComponents/Widgets/WokeAndShootHUD.h"
+#include "../../../GameComponents/Character/WokeAndShootCharacter.h"
+#include "../../../GameComponents/PlayerController/WokeAndShootPlayerController.h"
 #include "WokeAndShootGameMode.h"
 
 AWokeAndShootGameMode::AWokeAndShootGameMode()

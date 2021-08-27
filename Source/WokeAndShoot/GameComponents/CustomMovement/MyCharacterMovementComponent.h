@@ -34,6 +34,6 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////
 // Debug toggles
 
-	UPROPERTY(EditEverywhere, BlueprintReadOnly, Category = "Debug Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug Mode")
 	bool Debug_AirStrafing = false;
 };

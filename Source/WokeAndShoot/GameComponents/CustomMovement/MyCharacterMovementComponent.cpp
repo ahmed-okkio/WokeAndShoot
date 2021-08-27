@@ -5,7 +5,7 @@
 #include "MyCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/InputSettings.h"
-#include "WokeAndShootCharacter.h"
+#include "../Character/WokeAndShootCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 

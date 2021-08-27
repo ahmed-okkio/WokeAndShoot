@@ -4,8 +4,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "WokeAndShootCharacter.h"
-#include "CharacterComponenets/HealthComponent.h"
+#include "../Character/WokeAndShootCharacter.h"
+#include "../Character/CharacterComponenets/HealthComponent.h"
 
 AWokeAndShootProjectile::AWokeAndShootProjectile() 
 {

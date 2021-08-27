@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "WokeAndShootPlayerController.h"
-#include "WokeAndShoot/WokeAndShootGameMode.h"
+#include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
 #include "WokeAndShoot/ServerComponents/MyPlayerState.h"
-#include "WokeAndShoot/GameComponents/DeathScreenWidget.h"
-#include "WokeAndShoot/WokeAndShootCharacter.h"
+#include "../Widgets/DeathScreenWidget.h"
+#include "../Character/WokeAndShootCharacter.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"
 
 void AWokeAndShootPlayerController::BeginPlay() 
@@ -22,8 +22,8 @@ void AWokeAndShootPlayerController::BeginPlay()
 void AWokeAndShootPlayerController::DisplayDeadWidget(FString KilledBy) 
 {
     if(!IsLocalPlayerController()){return;}
-    
-    if(DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass)))
+    DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
+    if(DeathScreen != nullptr)
     {
         DeathScreen->KillerName = KilledBy;
         DeathScreen->AddToViewport();

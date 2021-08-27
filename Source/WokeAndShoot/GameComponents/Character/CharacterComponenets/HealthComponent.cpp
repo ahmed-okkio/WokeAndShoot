@@ -3,8 +3,9 @@
 
 #include "HealthComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "WokeAndShoot/WokeAndShootGameMode.h"
-#include "WokeAndShoot/WokeAndShootPlayerController.h"
+#include "../../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
+#include "../../PlayerController/WokeAndShootPlayerController.h"
+
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -90,7 +91,6 @@ void UHealthComponent::Client_KillActor(AController* Killer)
 	if(KilledPlayerController == nullptr){return;}
 	if(KilledPlayerController->IsLocalController())
 	{
-		KilledPlayerController->PlayerKilled();
 		APawn* PlayerPawn =  Cast<APawn>(GetOwner());
 		if(PlayerPawn != nullptr)
 		{

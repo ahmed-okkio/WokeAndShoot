@@ -1,25 +1,19 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "WokeAndShootCharacter.h"
 #include "Animation/AnimInstance.h"
+#include "../CustomMovement/BoostPad.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "Components/SceneComponent.h"
-#include "MyCharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "CharacterComponenets/HealthComponent.h"
-#include "BoostPad.h"
-#include "WokeAndShootGameMode.h"
 #include "DrawDebugHelpers.h"
+#include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "../CustomMovement/MyCharacterMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "WokeAndShootCharacter.h"
 
-//Potentially depricated
-// #include "GameFramework/CharacterMovementComponent.h"
-// #include "Particles/ParticleSystem.h"
-// #include "HeadMountedDisplayFunctionLibrary.h"
-// #include "WokeAndShootProjectile.h"
-// #include "GameFramework/InputSettings.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);

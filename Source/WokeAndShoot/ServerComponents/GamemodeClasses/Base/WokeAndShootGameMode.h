@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "WokeAndShoot/WokeAndShootCharacter.h"
 #include "WokeAndShootGameMode.generated.h"
 
 struct PlayerInformation

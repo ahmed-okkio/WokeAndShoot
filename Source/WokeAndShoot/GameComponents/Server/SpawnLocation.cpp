@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../WokeAndShootGameMode.h"
+#include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
 #include "SpawnLocation.h"
 
 

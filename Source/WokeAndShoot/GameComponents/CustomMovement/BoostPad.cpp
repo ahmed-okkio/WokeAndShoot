@@ -5,8 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
-#include "WokeAndShoot/WokeAndShootProjectile.h"
-#include "WokeAndShoot/WokeAndShootCharacter.h"
+#include "../Projectiles/WokeAndShootProjectile.h"
+#include "../Character/WokeAndShootCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "MyCharacterMovementComponent.h"
 // Sets default values
