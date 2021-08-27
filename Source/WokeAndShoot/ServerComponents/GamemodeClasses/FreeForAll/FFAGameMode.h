@@ -13,11 +13,7 @@ UCLASS()
 class WOKEANDSHOOT_API AFFAGameMode : public AWokeAndShootGameMode
 {
 	GENERATED_BODY()
-private:
-
-private:
-
-public:
+	
 public:
 	AFFAGameMode();
 	virtual void PawnKilled(AController* Killed, AController* Killer) override;

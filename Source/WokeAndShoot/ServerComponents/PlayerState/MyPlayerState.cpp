@@ -9,7 +9,6 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-
     FDoRepLifetimeParams SharedParams;
 	SharedParams.bIsPushBased = true;
 
