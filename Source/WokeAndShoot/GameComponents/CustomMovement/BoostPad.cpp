@@ -9,11 +9,11 @@
 #include "../Character/WokeAndShootCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "MyCharacterMovementComponent.h"
-// Sets default values
+
 ABoostPad::ABoostPad()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->InitSphereRadius(5.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("BoostPad");
@@ -21,10 +21,7 @@ ABoostPad::ABoostPad()
 	RootComponent = CollisionComp;
 	PadMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoostPadMesh"));
 	PadMesh->AttachTo(CollisionComp);
-	// if(HasAuthority())
-	// {
-	// 	PadMesh->OnComponentHit.AddDynamic(this, &ABoostPad::OnHit);
-	// }
+
 }
 
 void ABoostPad::BoostPlayers(AWokeAndShootCharacter* Initiator) 
@@ -33,21 +30,9 @@ void ABoostPad::BoostPlayers(AWokeAndShootCharacter* Initiator)
 	ApplyBoost(Initiator);
 }
 
-// Called when the game starts or when spawned
 void ABoostPad::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ABoostPad::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) 
-{
-}
-
-// Called every frame
-void ABoostPad::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void ABoostPad::InitiateCooldown(AWokeAndShootCharacter* HitActor) 
@@ -78,10 +63,8 @@ bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation)
 	//Check if Actor is within cone
 	float AngleToFront = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardFacingDirection, TargetFacingDirection)));
 
-	if(AngleToFront > 80.f)
-		return false;
-	else
-		return true;
+	if(AngleToFront > 80.f) {return false;}
+	else {return true;}
 }
 
 FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation) 
@@ -89,7 +72,8 @@ FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation)
 	//Calculate Impulse direction+amount
 	FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
 	ImpulseDirection.Normalize();
-	ImpulseDirection*= BoostAmount;	
+	ImpulseDirection*= BoostAmount;
+		
 	return ImpulseDirection;
 }
 
