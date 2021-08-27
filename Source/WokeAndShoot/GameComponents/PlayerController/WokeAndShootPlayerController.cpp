@@ -2,7 +2,7 @@
 
 #include "WokeAndShootPlayerController.h"
 #include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
-#include "WokeAndShoot/ServerComponents/MyPlayerState.h"
+#include "WokeAndShoot/ServerComponents/PlayerState/MyPlayerState.h"
 #include "../Widgets/DeathScreenWidget.h"
 #include "../Character/WokeAndShootCharacter.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"

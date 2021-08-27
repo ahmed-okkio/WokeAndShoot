@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Net/UnrealNetwork.h"
-#include "../GameComponents/PlayerController/WokeAndShootPlayerController.h"
+#include "../../GameComponents/PlayerController/WokeAndShootPlayerController.h"
 #include "MyPlayerState.h"
 
 
