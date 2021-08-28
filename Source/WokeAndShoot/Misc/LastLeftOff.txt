@@ -1,2 +1,3 @@
-Create main menu.
-add option to change username.
+Finshed main menu skeleton.
+Make esc menu with resume , options , exit to main menu and quit game.
+Scoreboard.

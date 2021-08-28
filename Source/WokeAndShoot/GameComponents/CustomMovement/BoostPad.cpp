@@ -26,7 +26,7 @@ ABoostPad::ABoostPad()
 
 void ABoostPad::BoostPlayers(AWokeAndShootCharacter* Initiator) 
 {
-	//ApplyBoost to Local
+	// ApplyBoost to Local
 	ApplyBoost(Initiator);
 }
 
@@ -51,7 +51,7 @@ void ABoostPad::RemoveActorCD()
 
 bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation) 
 {
-	//Calculate cone range
+	// Calculate cone range
 	FVector FrontFacingVector = PadLocation + GetActorRotation().RotateVector(FVector(0,100,0));
 
 	FVector ForwardFacingDirection = FrontFacingVector - PadLocation;
@@ -60,7 +60,7 @@ bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation)
 	FVector TargetFacingDirection = HitActorLocation - PadLocation;
 	TargetFacingDirection.Normalize();
 
-	//Check if Actor is within cone
+	// Check if Actor is within cone
 	float AngleToFront = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardFacingDirection, TargetFacingDirection)));
 
 	if(AngleToFront > 80.f) {return false;}
@@ -69,7 +69,7 @@ bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation)
 
 FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation) 
 {
-	//Calculate Impulse direction+amount
+	// Calculate Impulse direction+amount
 	FVector ImpulseDirection = (ActorLocation + HeightOffset ) - GetActorLocation();
 	ImpulseDirection.Normalize();
 	ImpulseDirection*= BoostAmount;
@@ -92,7 +92,6 @@ void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator)
 	{
 		for(FHitResult HitResult : HitResults)
 		{
-			// UE_LOG(LogTemp,Warning,TEXT("Actor Hit: %s"),*HitResult.GetActor()->GetName());
 			AWokeAndShootCharacter* HitActor = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
 			if (HitActor != nullptr)
 			{
@@ -112,19 +111,19 @@ void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator)
 				{
 					continue;
 				}
-				//Apply Impulse
+				// Apply Impulse
 				HitActor->DirectionalImpulse(ImpulseDirection);
-				//Add Cooldown
+				// Add Cooldown
 				InitiateCooldown(HitActor);
 
 
-				//Debug Line for Forward Facing Line
+				// Debug Line for Forward Facing Line
 				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
 				// GLog->Log("Character Hit");
 			}
 		}
 	}
-	// DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
 	// GLog->Log("Fired");
 }
 
