@@ -6,6 +6,7 @@
 #include "../Widgets/DeathScreenWidget.h"
 #include "../Character/WokeAndShootCharacter.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"
+#include "UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
 
 void AWokeAndShootPlayerController::BeginPlay() 
 {
@@ -16,6 +17,44 @@ void AWokeAndShootPlayerController::BeginPlay()
         PlayerInformation CurrentPlayer {PlayerName};
         Gamemode->PlayersOnline++;
         Gamemode->Players.Add(GetUniqueID(),CurrentPlayer);
+    }
+}
+
+AWokeAndShootPlayerController::AWokeAndShootPlayerController() 
+{
+    PlayerName = MyReadWriteHelper::LoadFileToString("Username.cfg","UserSettings");
+}
+
+void AWokeAndShootPlayerController::OpenEscapeMenu() 
+{
+    if(!IsLocalPlayerController()){return;}
+    if (EscapeScreen == nullptr)
+    {
+        EscapeScreen = Cast<UUserWidget>(CreateWidget(this, EscapeScreenClass));
+    }
+
+    if(!EscapeScreen->IsInViewport())
+    {
+        UWidgetBlueprintLibrary::SetInputMode_UIOnly(this,EscapeScreen,true);
+        EscapeScreen->AddToViewport();
+        bShowMouseCursor = true;
+    }  
+}
+
+void AWokeAndShootPlayerController::SetupInputComponent() 
+{
+    Super::SetupInputComponent();
+    InputComponent->BindAction("EscapeMenu", IE_Pressed, this, &AWokeAndShootPlayerController::OpenEscapeMenu);
+}
+
+void AWokeAndShootPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason) 
+{
+    Super::EndPlay(EndPlayReason);
+
+    if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
+    {
+        Gamemode->PlayersOnline--;
+        Gamemode->Players.Remove(GetUniqueID());
     }
 }
 
@@ -36,21 +75,5 @@ void AWokeAndShootPlayerController::ClearDeadWidget()
     if(DeathScreen != nullptr)
     {
         DeathScreen->RemoveFromViewport();
-    }
-}
-
-AWokeAndShootPlayerController::AWokeAndShootPlayerController() 
-{
-    PlayerName = MyReadWriteHelper::LoadFileToString("Username.cfg","UserSettings");
-}
-
-void AWokeAndShootPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason) 
-{
-    Super::EndPlay(EndPlayReason);
-
-    if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
-    {
-        Gamemode->PlayersOnline--;
-        Gamemode->Players.Remove(GetUniqueID());
     }
 }

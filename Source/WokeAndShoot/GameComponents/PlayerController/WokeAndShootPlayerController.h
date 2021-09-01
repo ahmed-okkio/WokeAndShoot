@@ -16,12 +16,17 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UDeathScreenWidget> DeathScreenClass;
 	UDeathScreenWidget* DeathScreen = nullptr;
-
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> EscapeScreenClass;
+	UUserWidget* EscapeScreen = nullptr;
 private:
 	AWokeAndShootPlayerController();
+	void OpenEscapeMenu();
 
 protected:
 	virtual void BeginPlay()override;
+	virtual void SetupInputComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
