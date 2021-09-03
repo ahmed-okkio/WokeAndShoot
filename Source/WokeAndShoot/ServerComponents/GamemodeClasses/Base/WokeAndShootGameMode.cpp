@@ -43,12 +43,12 @@ void AWokeAndShootGameMode::BeginPlay()
 
 void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController) 
 {
-	KilledController->GetPlayerState<AMyPlayerState>()->LastKilledBy = KillerController->PlayerName;
+	KilledController->GetPlayerState<AMyPlayerState>()->LastKilledBy = KillerController->GetLocalPlayerName();
 
 	//Only for when playing on the server as a client
 	if(KilledController->HasAuthority())
 	{
-		KilledController->DisplayDeadWidget(KillerController->PlayerName);
+		KilledController->DisplayDeadWidget(KillerController->GetLocalPlayerName());
 	}
 }
 

@@ -19,7 +19,11 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> EscapeScreenClass;
+	UPROPERTY()
 	UUserWidget* EscapeScreen = nullptr;
+
+	FString PlayerName = TEXT("Player");
+	FString UserSettingsPath = TEXT("/UserSettings/Username.cfg");
 private:
 	AWokeAndShootPlayerController();
 	void OpenEscapeMenu();
@@ -30,9 +34,11 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	FString PlayerName = TEXT("Player");
-
-public:
 	void DisplayDeadWidget(FString KilledBy);
 	void ClearDeadWidget();
+	
+	UFUNCTION(BlueprintPure, Category="Player Information")
+	FString GetLocalPlayerName() const;
+	UFUNCTION(BlueprintCallable, Category="Player Information")
+	void SetPlayerName(const FString& NewName);
 };

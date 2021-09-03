@@ -10,6 +10,8 @@ public:
 	MyReadWriteHelper();
 	~MyReadWriteHelper();
 
-	static FString LoadFileToString(FString FileName,FString FileArea);
+	static FString LoadFileToString(FString& FilePath);
+
+	static void SaveStringToFile(FString& String, FString& FilePath);
 
 };

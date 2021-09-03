@@ -11,34 +11,40 @@
 void AWokeAndShootPlayerController::BeginPlay() 
 {
     Super::BeginPlay();
-    AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode());
-    if(Gamemode != nullptr)
+    
+    if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
     {
         PlayerInformation CurrentPlayer {PlayerName};
         Gamemode->PlayersOnline++;
         Gamemode->Players.Add(GetUniqueID(),CurrentPlayer);
     }
+    if(IsLocalPlayerController())
+    {
+        PlayerName = MyReadWriteHelper::LoadFileToString(UserSettingsPath);
+        if(AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
+        {
+            PlayerState->SetPlayerName(PlayerName);
+        }
+    }
 }
 
 AWokeAndShootPlayerController::AWokeAndShootPlayerController() 
 {
-    PlayerName = MyReadWriteHelper::LoadFileToString("Username.cfg","UserSettings");
+
 }
 
 void AWokeAndShootPlayerController::OpenEscapeMenu() 
 {
-    if(!IsLocalPlayerController()){return;}
+    if(!IsLocalPlayerController() || GetWorld()->GetName() == TEXT("Stabilize_MainMenu")){return;}
+
     if (EscapeScreen == nullptr)
     {
         EscapeScreen = Cast<UUserWidget>(CreateWidget(this, EscapeScreenClass));
+        EscapeScreen->AddToViewport();
     }
 
-    if(!EscapeScreen->IsInViewport())
-    {
-        UWidgetBlueprintLibrary::SetInputMode_UIOnly(this,EscapeScreen,true);
-        EscapeScreen->AddToViewport();
-        bShowMouseCursor = true;
-    }  
+    UWidgetBlueprintLibrary::SetInputMode_UIOnly(this,EscapeScreen);
+    EscapeScreen->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AWokeAndShootPlayerController::SetupInputComponent() 
@@ -75,5 +81,23 @@ void AWokeAndShootPlayerController::ClearDeadWidget()
     if(DeathScreen != nullptr)
     {
         DeathScreen->RemoveFromViewport();
+    }
+}
+
+FString AWokeAndShootPlayerController::GetLocalPlayerName() const
+{
+    return PlayerName;
+}
+
+void AWokeAndShootPlayerController::SetPlayerName(const FString& NewName) 
+{
+    if(IsLocalPlayerController())
+    {
+        // Set local player name
+        PlayerName = NewName;
+        // Set online player name
+        PlayerState->SetPlayerName(PlayerName);
+        // Updating locally stored on disk name
+        MyReadWriteHelper::SaveStringToFile(PlayerName , UserSettingsPath);
     }
 }

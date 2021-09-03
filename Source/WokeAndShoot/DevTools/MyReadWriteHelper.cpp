@@ -12,24 +12,32 @@ MyReadWriteHelper::MyReadWriteHelper()
 MyReadWriteHelper::~MyReadWriteHelper()
 {
 }
-FString MyReadWriteHelper::LoadFileToString(FString FileName, FString FileArea) 
+FString MyReadWriteHelper::LoadFileToString(FString& FilePath) 
 {
-    FString Directory = FPaths::ProjectContentDir()+ "/" + FileArea;
+    FString Directory = FPaths::ProjectContentDir() + FilePath;
     IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
     FString Result = TEXT("No Result");
 
     if(PlatformFile.CreateDirectory(*Directory))
     {
-        FString FilePath = Directory + "/"+ FileName;
-
-        if(!FFileHelper::LoadFileToString(Result, *FilePath))
+        if(!FFileHelper::LoadFileToString(Result, *Directory))
         {
-            FFileHelper::SaveStringToFile(TEXT("PlayerName"),*FilePath);
-            FFileHelper::LoadFileToString(Result, *FilePath);
-            
+            FFileHelper::SaveStringToFile(TEXT("PlayerName"),*Directory);
+            FFileHelper::LoadFileToString(Result, *Directory);
             return Result;
         }
     }
 
     return Result;
+}
+
+void MyReadWriteHelper::SaveStringToFile(FString& String, FString& FilePath) 
+{
+    FString Directory = FPaths::ProjectContentDir() + FilePath;
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+    if(PlatformFile.CreateDirectory(*Directory))
+    {
+        FFileHelper::SaveStringToFile(String,*Directory);
+    }
 }

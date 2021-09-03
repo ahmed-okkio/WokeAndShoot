@@ -1,3 +1,3 @@
-Finshed main menu skeleton.
-Make esc menu with resume , options , exit to main menu and quit game.
-Scoreboard.
+Finished escape menu.
+Changename menu.
+make the Scoreboard.
