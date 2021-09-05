@@ -21,12 +21,18 @@ private:
 	TSubclassOf<class UUserWidget> EscapeScreenClass;
 	UPROPERTY()
 	UUserWidget* EscapeScreen = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> ScoreboardClass;
+	UPROPERTY()
+	UUserWidget* Scoreboard = nullptr;
 
 	FString PlayerName = TEXT("Player");
 	FString UserSettingsPath = TEXT("/UserSettings/Username.cfg");
 private:
 	AWokeAndShootPlayerController();
 	void OpenEscapeMenu();
+	void OpenScoreboard();
+	void CloseScoreboard();
 
 protected:
 	virtual void BeginPlay()override;

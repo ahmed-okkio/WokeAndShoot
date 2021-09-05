@@ -35,8 +35,6 @@ AWokeAndShootPlayerController::AWokeAndShootPlayerController()
 
 void AWokeAndShootPlayerController::OpenEscapeMenu() 
 {
-    if(!IsLocalPlayerController() || GetWorld()->GetName() == TEXT("Stabilize_MainMenu")){return;}
-
     if (EscapeScreen == nullptr)
     {
         EscapeScreen = Cast<UUserWidget>(CreateWidget(this, EscapeScreenClass));
@@ -47,10 +45,35 @@ void AWokeAndShootPlayerController::OpenEscapeMenu()
     EscapeScreen->SetVisibility(ESlateVisibility::Visible);
 }
 
+void AWokeAndShootPlayerController::OpenScoreboard() 
+{
+    if (Scoreboard == nullptr)
+    {
+        Scoreboard = Cast<UUserWidget>(CreateWidget(this, ScoreboardClass));
+        Scoreboard->AddToViewport();
+    }
+
+    // UWidgetBlueprintLibrary::SetInputMode_UIOnly(this,Scoreboard);
+    Scoreboard->SetVisibility(ESlateVisibility::Visible);
+}
+
+void AWokeAndShootPlayerController::CloseScoreboard() 
+{
+     if (Scoreboard == nullptr){return;}
+    Scoreboard->SetVisibility(ESlateVisibility::Hidden);
+}
+
 void AWokeAndShootPlayerController::SetupInputComponent() 
 {
     Super::SetupInputComponent();
-    InputComponent->BindAction("EscapeMenu", IE_Pressed, this, &AWokeAndShootPlayerController::OpenEscapeMenu);
+
+    if(IsLocalPlayerController() && GetWorld()->GetName() != TEXT("Stabilize_MainMenu"))
+    {
+        InputComponent->BindAction("EscapeMenu", IE_Pressed, this, &AWokeAndShootPlayerController::OpenEscapeMenu);
+        InputComponent->BindAction("Scoreboard", IE_Pressed, this, &AWokeAndShootPlayerController::OpenScoreboard);
+        InputComponent->BindAction("Scoreboard", IE_Released, this, &AWokeAndShootPlayerController::CloseScoreboard);
+    }
+
 }
 
 void AWokeAndShootPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason) 

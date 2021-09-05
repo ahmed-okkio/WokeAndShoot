@@ -31,7 +31,7 @@ protected:
 protected:
 	virtual void BeginPlay()override;
 	void UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController);
-	void UpdateScore(uint32 KillerID);
+	void UpdateScore(AController* Killer);
 	void RestartGame();
 
 public:

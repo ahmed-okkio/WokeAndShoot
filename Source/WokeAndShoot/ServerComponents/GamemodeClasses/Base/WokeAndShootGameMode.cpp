@@ -33,7 +33,8 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
 
 	UpdateKillerName(KilledController, KillerController);
-	UpdateScore(Killer->GetUniqueID());
+	UpdateScore(Killer);
+	
 }
 
 void AWokeAndShootGameMode::BeginPlay() 
@@ -52,8 +53,11 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 	}
 }
 
-void AWokeAndShootGameMode::UpdateScore(uint32 KillerID) 
+void AWokeAndShootGameMode::UpdateScore(AController* Killer) 
 {
+	uint32 KillerID = Killer->GetUniqueID();
+
+	Killer->GetPlayerState<AMyPlayerState>()->Score++;
 	int32 CurrentPlayerScore = Players.Find(KillerID)->Score;
 	CurrentPlayerScore++;
 

@@ -1,3 +1,2 @@
-Finished escape menu.
-Changename menu.
-make the Scoreboard.
+Finished scoreboard.
+Set up connecting to server.
