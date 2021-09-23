@@ -26,18 +26,21 @@ private:
 	UPROPERTY()
 	UUserWidget* Scoreboard = nullptr;
 
-	FString PlayerName = TEXT("Player");
-	FString UserSettingsPath = TEXT("/UserSettings/Username.cfg");
-private:
-	AWokeAndShootPlayerController();
-	void OpenEscapeMenu();
-	void OpenScoreboard();
-	void CloseScoreboard();
+	FString PlayerName;
+	float InternalSensitivity;
 
 protected:
 	virtual void BeginPlay()override;
-	virtual void SetupInputComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void SetupInputComponent() override;
+	virtual void OnRep_PlayerState() override;
+
+private:
+	AWokeAndShootPlayerController();
+
+	void OpenEscapeMenu();
+	void OpenScoreboard();
+	void CloseScoreboard();
 
 public:
 	void DisplayDeadWidget(FString KilledBy);
@@ -46,5 +49,17 @@ public:
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;
 	UFUNCTION(BlueprintCallable, Category="Player Information")
-	void SetPlayerName(const FString& NewName);
+	void SetLocalPlayerName(const FString& NewName);
+
+	UFUNCTION(BlueprintPure, Category="Player Settings")
+	float GetSensitivity() const;
+	UFUNCTION(BlueprintCallable, Category="Player Settings")
+	void SetSensitivity(float NewSensitivity);
+
+private:
+	// Network
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_ChangeName(const FString& NewName);
+	bool Server_ChangeName_Validate(const FString& NewName);
+	void Server_ChangeName_Implementation(const FString& NewName);
 };

@@ -32,3 +32,4 @@ void AMyPlayerState::OnRep_Respawn()
         PlayerController->ClearDeadWidget();
     }
 }
+

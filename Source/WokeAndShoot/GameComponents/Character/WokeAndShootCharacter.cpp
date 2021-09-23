@@ -1,16 +1,19 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Animation/AnimInstance.h"
 #include "../CustomMovement/BoostPad.h"
+#include "../CustomMovement/MyCharacterMovementComponent.h"
+#include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
+#include "../PlayerController/WokeAndShootPlayerController.h"
+#include "../../ServerComponents/PlayerState/MyPlayerState.h"
+#include "../GameInstance/WnSGameInstance.h"
+#include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "CharacterComponenets/HealthComponent.h"
 #include "DrawDebugHelpers.h"
-#include "../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "../CustomMovement/MyCharacterMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "WokeAndShootCharacter.h"
 
@@ -41,6 +44,7 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 
 	// Set Health Component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
 }
 
 void AWokeAndShootCharacter::BeginPlay()
@@ -54,6 +58,7 @@ void AWokeAndShootCharacter::BeginPlay()
     {
         Gamemode->PlayersAlive++;
     }
+	
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -82,6 +87,12 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	// Bind turn events
 	PlayerInputComponent->BindAxis("Turn", this, &AWokeAndShootCharacter::LookLeftRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AWokeAndShootCharacter::LookUpDown);
+
+	// Setting Sensitivity
+	if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
+	{
+		Sensitivity = MyGameInstance->GetPlayerSensitivity();
+	}
 }
 
 void AWokeAndShootCharacter::OnFire()
@@ -290,6 +301,11 @@ bool AWokeAndShootCharacter::IsDead() const
 		return true;
 	}
 	return false;
+}
+
+void AWokeAndShootCharacter::UpdateSensitivity(float NewSensitivity) 
+{
+	
 }
 
 // Initialization functions

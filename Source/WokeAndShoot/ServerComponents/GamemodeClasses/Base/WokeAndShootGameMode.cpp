@@ -39,17 +39,23 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 
 void AWokeAndShootGameMode::BeginPlay() 
 {
-	
+	Super::BeginPlay();
 }
 
 void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController) 
 {
-	KilledController->GetPlayerState<AMyPlayerState>()->LastKilledBy = KillerController->GetLocalPlayerName();
-
-	//Only for when playing on the server as a client
-	if(KilledController->HasAuthority())
+	if(auto KilledPlayerState = KilledController->GetPlayerState<AMyPlayerState>())
 	{
-		KilledController->DisplayDeadWidget(KillerController->GetLocalPlayerName());
+		if(auto KillerPlayerState = KillerController->PlayerState)
+		{
+			KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
+	
+			//Only for when playing on the server as a client
+			if(KilledController->HasAuthority())
+			{
+				KilledController->DisplayDeadWidget(KillerPlayerState->GetPlayerName());
+			}
+		}
 	}
 }
 

@@ -233,6 +233,8 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;
 
+	void UpdateSensitivity(float NewSensitivity);
+
 public:
 ///////////////////////////////////////////////////////////////////////////////////////
 // Debug toggles

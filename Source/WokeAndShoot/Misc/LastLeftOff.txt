@@ -1,2 +1,3 @@
-Finished scoreboard.
-Set up connecting to server.
+Refactor with auto keyword.
+
+Fix crosshair center.
