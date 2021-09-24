@@ -140,6 +140,7 @@ protected:
 	virtual void BeginPlay();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	virtual void Restart() override;
 
 	//Get ViewPoint Rotation and Location
 	void GetViewPointRotLoc(FVector &ViewPointLocation, FRotator &ViewPointRotation) const;
@@ -232,6 +233,8 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;
+
+	void SetCharacterSensitivity();
 
 public:
 ///////////////////////////////////////////////////////////////////////////////////////

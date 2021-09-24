@@ -3,7 +3,6 @@
 #include "GameFramework/GameSession.h"
 #include "UObject/ConstructorHelpers.h"
 #include "WokeAndShoot/ServerComponents/PlayerState/MyPlayerState.h"
-#include "../../../GameComponents/Widgets/WokeAndShootHUD.h"
 #include "../../../GameComponents/Character/WokeAndShootCharacter.h"
 #include "../../../GameComponents/PlayerController/WokeAndShootPlayerController.h"
 #include "WokeAndShootGameMode.h"
@@ -12,11 +11,8 @@ AWokeAndShootGameMode::AWokeAndShootGameMode()
 	: Super()
 {
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPersonCPP/Blueprints/FirstPersonCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/WokeAndShoot/Blueprints/FirstPersonCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
-
-	// use our custom HUD class
-	HUDClass = AWokeAndShootHUD::StaticClass();
 }
 
 void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer) 
@@ -33,27 +29,43 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
 
 	UpdateKillerName(KilledController, KillerController);
-	UpdateScore(Killer->GetUniqueID());
+	UpdateScore(Killer);
+
+	// Temporary patch to notify server player he has been killed.
+	if(KilledController->HasAuthority() && KilledController->IsLocalPlayerController())
+	{
+		KilledController->LocalOnUnPossess();
+	}
+	
 }
 
 void AWokeAndShootGameMode::BeginPlay() 
 {
-	
+	Super::BeginPlay();
 }
 
 void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController) 
 {
-	KilledController->GetPlayerState<AMyPlayerState>()->LastKilledBy = KillerController->PlayerName;
-
-	//Only for when playing on the server as a client
-	if(KilledController->HasAuthority())
+	if(auto KilledPlayerState = KilledController->GetPlayerState<AMyPlayerState>())
 	{
-		KilledController->DisplayDeadWidget(KillerController->PlayerName);
+		if(auto KillerPlayerState = KillerController->PlayerState)
+		{
+			KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
+	
+			//Only for when playing on the server as a client
+			if(KilledController->HasAuthority())
+			{
+				KilledController->DisplayDeadWidget(KillerPlayerState->GetPlayerName());
+			}
+		}
 	}
 }
 
-void AWokeAndShootGameMode::UpdateScore(uint32 KillerID) 
+void AWokeAndShootGameMode::UpdateScore(AController* Killer) 
 {
+	uint32 KillerID = Killer->GetUniqueID();
+
+	Killer->GetPlayerState<AMyPlayerState>()->Score++;
 	int32 CurrentPlayerScore = Players.Find(KillerID)->Score;
 	CurrentPlayerScore++;
 

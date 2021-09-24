@@ -1,2 +1,4 @@
-Create main menu.
-add option to change username.
+Rename LocalOnPossess and UnPossess.
+Look into death notifications for server player and client players.
+
+Refactor with auto keyword.
