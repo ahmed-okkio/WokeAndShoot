@@ -17,6 +17,7 @@ class WOKEANDSHOOT_API UWnSGameInstance : public UGameInstance
 		FString PlayerName;
 		float PlayerSensitivity;
 	};
+	
 private:
 	UWnSGameInstance();
 
@@ -29,6 +30,7 @@ public:
 public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
+	virtual void StartGameInstance() override;
 
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetPlayerName() const;

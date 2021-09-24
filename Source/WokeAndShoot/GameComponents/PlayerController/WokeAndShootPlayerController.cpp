@@ -71,6 +71,27 @@ void AWokeAndShootPlayerController::OnRep_PlayerState()
     }
 }
 
+void AWokeAndShootPlayerController::OnPossess(APawn* InPawn) 
+{
+    Super::OnPossess(InPawn);
+
+    IsPossessing = true;
+
+    // Runs only for server player.
+    if(IsLocalPlayerController())
+    {
+        if (HUD == nullptr)
+        {
+            HUD = Cast<UUserWidget>(CreateWidget(this, HUDClass));
+            HUD->AddToViewport();
+        }
+        else
+        {
+            HUD->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
+}
+
 AWokeAndShootPlayerController::AWokeAndShootPlayerController() 
 {
 
@@ -103,6 +124,36 @@ void AWokeAndShootPlayerController::CloseScoreboard()
 {
     if (Scoreboard == nullptr){return;}
     Scoreboard->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void AWokeAndShootPlayerController::LocalOnPossess() 
+{
+    IsPossessing = true;
+
+    if(IsLocalPlayerController())
+    {
+        if (HUD == nullptr)
+        {
+            HUD = Cast<UUserWidget>(CreateWidget(this, HUDClass));
+            HUD->AddToViewport();
+        }
+        else
+        {
+            HUD->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
+}
+
+void AWokeAndShootPlayerController::LocalOnUnPossess() 
+{
+    IsPossessing = false;
+    
+
+    if (HUD == nullptr){return;}
+    if(IsLocalPlayerController())
+    {
+        HUD->SetVisibility(ESlateVisibility::Hidden);
+    }   
 }
 
 
@@ -160,6 +211,13 @@ void AWokeAndShootPlayerController::SetSensitivity(float NewSensitivity)
     if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
     {
         MyGameInstance->SetPlayerSensitvity(NewSensitivity);
+    }
+    if(IsPossessing)
+    {
+        if(auto WnSCharacter = Cast<AWokeAndShootCharacter>(GetPawn()))
+        {
+            WnSCharacter->SetCharacterSensitivity();
+        }
     }
 }
 

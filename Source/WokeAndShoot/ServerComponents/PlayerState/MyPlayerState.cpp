@@ -19,15 +19,16 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 
 void AMyPlayerState::OnRep_KilledBy() 
 {
-    if(AWokeAndShootPlayerController* PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
+    if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->DisplayDeadWidget(LastKilledBy);
+        PlayerController->LocalOnUnPossess();
     }
 }
 
 void AMyPlayerState::OnRep_Respawn() 
 {
-    if(AWokeAndShootPlayerController* PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
+    if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->ClearDeadWidget();
     }

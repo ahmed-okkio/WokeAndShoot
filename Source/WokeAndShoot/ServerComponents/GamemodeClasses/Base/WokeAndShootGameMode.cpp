@@ -3,7 +3,6 @@
 #include "GameFramework/GameSession.h"
 #include "UObject/ConstructorHelpers.h"
 #include "WokeAndShoot/ServerComponents/PlayerState/MyPlayerState.h"
-#include "../../../GameComponents/Widgets/WokeAndShootHUD.h"
 #include "../../../GameComponents/Character/WokeAndShootCharacter.h"
 #include "../../../GameComponents/PlayerController/WokeAndShootPlayerController.h"
 #include "WokeAndShootGameMode.h"
@@ -14,9 +13,6 @@ AWokeAndShootGameMode::AWokeAndShootGameMode()
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/WokeAndShoot/Blueprints/FirstPersonCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
-
-	// use our custom HUD class
-	HUDClass = AWokeAndShootHUD::StaticClass();
 }
 
 void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer) 
@@ -34,6 +30,12 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 
 	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer);
+
+	// Temporary patch to notify server player he has been killed.
+	if(KilledController->HasAuthority() && KilledController->IsLocalPlayerController())
+	{
+		KilledController->LocalOnUnPossess();
+	}
 	
 }
 

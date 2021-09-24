@@ -1,3 +1,4 @@
-Refactor with auto keyword.
+Rename LocalOnPossess and UnPossess.
+Look into death notifications for server player and client players.
 
-Fix crosshair center.
+Refactor with auto keyword.

@@ -25,15 +25,22 @@ private:
 	TSubclassOf<class UUserWidget> ScoreboardClass;
 	UPROPERTY()
 	UUserWidget* Scoreboard = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> HUDClass;
+	UPROPERTY()
+	UUserWidget* HUD = nullptr;
 
 	FString PlayerName;
 	float InternalSensitivity;
+	
+	bool IsPossessing = false;
 
 protected:
 	virtual void BeginPlay()override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void SetupInputComponent() override;
 	virtual void OnRep_PlayerState() override;
+	virtual void OnPossess(APawn* InPawn) override;
 
 private:
 	AWokeAndShootPlayerController();
@@ -43,6 +50,8 @@ private:
 	void CloseScoreboard();
 
 public:
+	void LocalOnPossess();
+	void LocalOnUnPossess();
 	void DisplayDeadWidget(FString KilledBy);
 	void ClearDeadWidget();
 	

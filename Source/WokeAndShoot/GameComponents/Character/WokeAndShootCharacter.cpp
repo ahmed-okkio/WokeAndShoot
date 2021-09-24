@@ -54,7 +54,7 @@ void AWokeAndShootCharacter::BeginPlay()
 	// Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
 
-    if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
+    if(auto Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
     {
         Gamemode->PlayersAlive++;
     }
@@ -89,10 +89,18 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("LookUp", this, &AWokeAndShootCharacter::LookUpDown);
 
 	// Setting Sensitivity
-	if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
-	{
-		Sensitivity = MyGameInstance->GetPlayerSensitivity();
-	}
+	SetCharacterSensitivity();
+}
+
+void AWokeAndShootCharacter::Restart() 
+{
+	Super::Restart();
+
+	if(auto OwnerController = Cast<AWokeAndShootPlayerController>(GetController()))
+    {
+        OwnerController->LocalOnPossess();
+    }
+
 }
 
 void AWokeAndShootCharacter::OnFire()
@@ -124,7 +132,7 @@ void AWokeAndShootCharacter::OnFire()
 		{
 			PlayBulletImpactAnimation(HitResult.Location, ShotDirection.Rotation());
 
-			if(ABoostPad* HitBoostPad = Cast<ABoostPad>(HitResult.GetActor()))
+			if(auto HitBoostPad = Cast<ABoostPad>(HitResult.GetActor()))
 			{
 				HitBoostPad->BoostPlayers(this);
 
@@ -150,7 +158,9 @@ void AWokeAndShootCharacter::GetViewPointRotLoc(OUT FVector &ViewPointLocation, 
 	AController* OwnerController = GetController();
 	if (OwnerController == nullptr) return;
 
-	OwnerController->GetPlayerViewPoint(OUT ViewPointLocation, OUT ViewPointRotation);
+	// OwnerController->GetPlayerViewPoint(OUT ViewPointLocation, OUT ViewPointRotation);
+	ViewPointLocation = FirstPersonCameraComponent->GetComponentLocation();
+	ViewPointRotation = FirstPersonCameraComponent->GetComponentRotation();
 }
 
 // TO DO: Rework, currently inactive
@@ -303,9 +313,12 @@ bool AWokeAndShootCharacter::IsDead() const
 	return false;
 }
 
-void AWokeAndShootCharacter::UpdateSensitivity(float NewSensitivity) 
+void AWokeAndShootCharacter::SetCharacterSensitivity() 
 {
-	
+	if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
+	{
+		Sensitivity = MyGameInstance->GetPlayerSensitivity();
+	}
 }
 
 // Initialization functions
@@ -313,7 +326,6 @@ void AWokeAndShootCharacter::CreateCameraComp()
 {
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 }
 
@@ -400,7 +412,7 @@ void AWokeAndShootCharacter::HitScan(FHitResult& HitResult, FCollisionQueryParam
 	{
 		if (bool bLineTrace = GetWorld()->LineTraceSingleByChannel(OUT HitResult, StartingLocation, EndLocation, ECollisionChannel::ECC_GameTraceChannel2, Params))
 		{
-			if(AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitResult.GetActor()))
+			if(auto Character = Cast<AWokeAndShootCharacter>(HitResult.GetActor()))
 			{
 				Multi_RelayDamage(100.f, HitResult.GetActor());
 			}
@@ -513,8 +525,8 @@ void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(const FVector& V
 	bool bLineTrace = World->LineTraceSingleByChannel(ServerHitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
 	if(bLineTrace && ServerHitResult.GetActor())
 	{
-		AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor());
-		if(Character)
+		
+		if(auto Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor()))
 		{
 			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
 		}
@@ -529,8 +541,8 @@ bool AWokeAndShootCharacter::Multi_RelayDamage_Validate(float Damage, AActor* Hi
 
 void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AActor* HitActor) 
 {
-	AWokeAndShootCharacter* Character = Cast<AWokeAndShootCharacter>(HitActor);
-	if(Character)
+	
+	if(auto Character = Cast<AWokeAndShootCharacter>(HitActor))
 	{
 		Character->HealthComponent->ApplyDamage(Damage,GetController());
 	}

@@ -22,12 +22,17 @@ void UWnSGameInstance::Shutdown()
     Super::Shutdown();
 
     // Save changes on shutdown
-    if(!LoadedPlayerData.PlayerName.IsEmpty() || LoadedPlayerData.PlayerSensitivity >= 0)
+    if(!LoadedPlayerData.PlayerName.IsEmpty() && LoadedPlayerData.PlayerSensitivity >= 0)
     {
         PlayerData->Cfg_PlayerName = LoadedPlayerData.PlayerName;
         PlayerData->Cfg_PlayerSensitivity = LoadedPlayerData.PlayerSensitivity;
         PlayerData->SaveConfig();
     }
+}
+
+void UWnSGameInstance::StartGameInstance() 
+{
+    Super::StartGameInstance();
 }
 
 FString UWnSGameInstance::GetPlayerName() const
