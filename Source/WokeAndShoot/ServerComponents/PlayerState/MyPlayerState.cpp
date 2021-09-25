@@ -21,8 +21,7 @@ void AMyPlayerState::OnRep_KilledBy()
 {
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
-        PlayerController->DisplayDeadWidget(LastKilledBy);
-        PlayerController->LocalOnUnPossess();
+        PlayerController->ClientReceiveDeath();
     }
 }
 
@@ -30,7 +29,7 @@ void AMyPlayerState::OnRep_Respawn()
 {
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
-        PlayerController->ClearDeadWidget();
+        PlayerController->ClientReceiveSpawn();
     }
 }
 

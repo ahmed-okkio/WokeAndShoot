@@ -51,9 +51,9 @@ void AWokeAndShootPlayerController::SetupInputComponent()
 
     if(IsLocalPlayerController() && GetWorld()->GetName() != TEXT("Stabilize_MainMenu"))
     {
-        InputComponent->BindAction("EscapeMenu", IE_Pressed, this, &AWokeAndShootPlayerController::OpenEscapeMenu);
-        InputComponent->BindAction("Scoreboard", IE_Pressed, this, &AWokeAndShootPlayerController::OpenScoreboard);
-        InputComponent->BindAction("Scoreboard", IE_Released, this, &AWokeAndShootPlayerController::CloseScoreboard);
+        InputComponent->BindAction("EscapeMenu", IE_Pressed, this, &AWokeAndShootPlayerController::ShowEscapeMenu);
+        InputComponent->BindAction("Scoreboard", IE_Pressed, this, &AWokeAndShootPlayerController::ShowScoreboard);
+        InputComponent->BindAction("Scoreboard", IE_Released, this, &AWokeAndShootPlayerController::HideScoreboard);
     }
 }
 
@@ -97,7 +97,7 @@ AWokeAndShootPlayerController::AWokeAndShootPlayerController()
 
 }
 
-void AWokeAndShootPlayerController::OpenEscapeMenu() 
+void AWokeAndShootPlayerController::ShowEscapeMenu() 
 {
     if (EscapeScreen == nullptr)
     {
@@ -109,7 +109,7 @@ void AWokeAndShootPlayerController::OpenEscapeMenu()
     EscapeScreen->SetVisibility(ESlateVisibility::Visible);
 }
 
-void AWokeAndShootPlayerController::OpenScoreboard() 
+void AWokeAndShootPlayerController::ShowScoreboard() 
 {
     if (Scoreboard == nullptr)
     {
@@ -120,60 +120,88 @@ void AWokeAndShootPlayerController::OpenScoreboard()
     Scoreboard->SetVisibility(ESlateVisibility::Visible);
 }
 
-void AWokeAndShootPlayerController::CloseScoreboard() 
+void AWokeAndShootPlayerController::HideScoreboard() 
 {
     if (Scoreboard == nullptr){return;}
     Scoreboard->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void AWokeAndShootPlayerController::LocalOnPossess() 
+void AWokeAndShootPlayerController::ClientReceiveSpawn() 
 {
     IsPossessing = true;
 
     if(IsLocalPlayerController())
     {
-        if (HUD == nullptr)
-        {
-            HUD = Cast<UUserWidget>(CreateWidget(this, HUDClass));
-            HUD->AddToViewport();
-        }
-        else
-        {
-            HUD->SetVisibility(ESlateVisibility::Visible);
-        }
+        HideDeathScreen();
+        ShowHUD();
     }
 }
 
-void AWokeAndShootPlayerController::LocalOnUnPossess() 
+void AWokeAndShootPlayerController::ClientReceiveDeath() 
 {
     IsPossessing = false;
     
 
-    if (HUD == nullptr){return;}
+    
     if(IsLocalPlayerController())
     {
-        HUD->SetVisibility(ESlateVisibility::Hidden);
+        HideHUD();
+        ShowDeathScreen();
+        
     }   
 }
 
 
-void AWokeAndShootPlayerController::DisplayDeadWidget(FString KilledBy) 
+void AWokeAndShootPlayerController::ShowDeathScreen() 
 {
-    if(!IsLocalPlayerController()){return;}
-    DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
-    if(DeathScreen != nullptr)
+    if (DeathScreen == nullptr)
+    {  
+        DeathScreen = Cast<UDeathScreenWidget>(CreateWidget(this, DeathScreenClass));
+
+        if (DeathScreen != nullptr)
+        {
+            if(auto MyPlayerState = GetPlayerState<AMyPlayerState>())
+            {
+                DeathScreen->KillerName = MyPlayerState->LastKilledBy;
+                DeathScreen->AddToViewport();
+            }
+        }
+    }
+    else
     {
-        DeathScreen->KillerName = KilledBy;
-        DeathScreen->AddToViewport();
-    }  
+        DeathScreen->SetVisibility(ESlateVisibility::Visible);
+    }
 }
 
-void AWokeAndShootPlayerController::ClearDeadWidget() 
+void AWokeAndShootPlayerController::HideDeathScreen() 
 {
-    if(!IsLocalPlayerController()){return;}
     if(DeathScreen != nullptr)
     {
-        DeathScreen->RemoveFromViewport();
+        DeathScreen->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void AWokeAndShootPlayerController::ShowHUD() 
+{
+    if (HUD == nullptr)
+    {  
+        HUD = Cast<UUserWidget>(CreateWidget(this, HUDClass));
+        if (HUD != nullptr)
+        {
+            HUD->AddToViewport();
+        }
+    }
+    else
+    {
+        HUD->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void AWokeAndShootPlayerController::HideHUD() 
+{
+    if (HUD != nullptr)
+    {
+        HUD->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 

@@ -98,7 +98,7 @@ void AWokeAndShootCharacter::Restart()
 
 	if(auto OwnerController = Cast<AWokeAndShootPlayerController>(GetController()))
     {
-        OwnerController->LocalOnPossess();
+        OwnerController->ClientReceiveSpawn();
     }
 
 }

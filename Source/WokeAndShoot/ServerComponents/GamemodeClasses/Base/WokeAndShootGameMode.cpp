@@ -32,9 +32,9 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 	UpdateScore(Killer);
 
 	// Temporary patch to notify server player he has been killed.
-	if(KilledController->HasAuthority() && KilledController->IsLocalPlayerController())
+	if(KilledController->IsLocalPlayerController())
 	{
-		KilledController->LocalOnUnPossess();
+		KilledController->ClientReceiveDeath();
 	}
 	
 }
@@ -51,12 +51,12 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 		if(auto KillerPlayerState = KillerController->PlayerState)
 		{
 			KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
-	
-			//Only for when playing on the server as a client
-			if(KilledController->HasAuthority())
-			{
-				KilledController->DisplayDeadWidget(KillerPlayerState->GetPlayerName());
-			}
+			KilledPlayerState->ForceNetUpdate();
+			// //Only for when playing on the server as a client
+			// if(KilledController->HasAuthority())
+			// {
+			// 	KilledController->DisplayDeadWidget(KillerPlayerState->GetPlayerName());
+			// }
 		}
 	}
 }
@@ -116,15 +116,16 @@ void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerControl
     FRotator SpawnRotation = FRotator(0,0,0);
     FActorSpawnParameters SpawnParams;
 
-    if(AWokeAndShootCharacter* PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation))
+    if(auto PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation))
     {
         PlayerController->GetPlayerState<AMyPlayerState>()->NewPawn = PlayerCharacter;
-		
+		// Possess new pawn(respawn)
+		PlayerController->Possess(PlayerCharacter);
+
 		//Only for when playing on the server as a client
-		if(PlayerController->HasAuthority())
+		if(PlayerController->IsLocalPlayerController())
 		{
-			PlayerController->Possess(PlayerCharacter);
-			PlayerController->ClearDeadWidget();
+			PlayerController->ClientReceiveSpawn();
 		}
     }
 }

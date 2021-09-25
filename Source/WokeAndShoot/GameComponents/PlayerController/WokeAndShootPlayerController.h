@@ -15,6 +15,7 @@ class WOKEANDSHOOT_API AWokeAndShootPlayerController : public APlayerController
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UDeathScreenWidget> DeathScreenClass;
+	UPROPERTY()
 	UDeathScreenWidget* DeathScreen = nullptr;
 	
 	UPROPERTY(EditAnywhere)
@@ -45,15 +46,17 @@ protected:
 private:
 	AWokeAndShootPlayerController();
 
-	void OpenEscapeMenu();
-	void OpenScoreboard();
-	void CloseScoreboard();
+	void ShowEscapeMenu();
+	void ShowScoreboard();
+	void HideScoreboard();
+	void ShowDeathScreen();
+	void HideDeathScreen();
+	void ShowHUD();
+	void HideHUD();
 
 public:
-	void LocalOnPossess();
-	void LocalOnUnPossess();
-	void DisplayDeadWidget(FString KilledBy);
-	void ClearDeadWidget();
+	void ClientReceiveSpawn();
+	void ClientReceiveDeath();
 	
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;
