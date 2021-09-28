@@ -44,7 +44,6 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 
 	// Set Health Component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-
 }
 
 void AWokeAndShootCharacter::BeginPlay()
@@ -297,6 +296,7 @@ void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection)
 {
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
 	CharacterMovement->Launch(ImpulseDirection);
+	
 }
 
 void AWokeAndShootCharacter::Landed(const FHitResult & Hit) 

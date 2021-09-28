@@ -30,7 +30,7 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 
 	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer);
-
+	KilledController->UnPossess();
 	// Temporary patch to notify server player he has been killed.
 	if(KilledController->IsLocalPlayerController())
 	{
@@ -50,13 +50,13 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 	{
 		if(auto KillerPlayerState = KillerController->PlayerState)
 		{
+			KillInfo CurrentKillInfo {KillerPlayerState->GetPlayerName(),KilledPlayerState->GetPlayerName()};
+			ServerKillCount++;
+			KillInfoList.Add(CurrentKillInfo);
+			PushKillFeedToPlayers(CurrentKillInfo);
 			KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
 			KilledPlayerState->ForceNetUpdate();
-			// //Only for when playing on the server as a client
-			// if(KilledController->HasAuthority())
-			// {
-			// 	KilledController->DisplayDeadWidget(KillerPlayerState->GetPlayerName());
-			// }
+
 		}
 	}
 }
@@ -128,4 +128,26 @@ void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerControl
 			PlayerController->ClientReceiveSpawn();
 		}
     }
+}
+
+void AWokeAndShootGameMode::PushKillFeedToPlayers(KillInfo NewKillInfo) 
+{
+	for( FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator )
+	{
+
+		if( auto PlayerController = Cast<AWokeAndShootPlayerController>(Iterator->Get()))
+		{
+			if(auto PlayerState = PlayerController->GetPlayerState<AMyPlayerState>())
+			{
+				PlayerState->CurrentKillInfo = FKillInfo {NewKillInfo.KillerName,NewKillInfo.KilledName,ServerKillCount};
+				PlayerController->ForceNetUpdate();
+
+				//Call for server player to receive KillInfo
+				if(PlayerController->IsLocalPlayerController() && PlayerController->HasAuthority())
+				{
+					PlayerController->ClientReceiveKillInfo(FKillInfo {NewKillInfo.KillerName,NewKillInfo.KilledName,ServerKillCount});
+				}
+			}
+     	}
+}
 }

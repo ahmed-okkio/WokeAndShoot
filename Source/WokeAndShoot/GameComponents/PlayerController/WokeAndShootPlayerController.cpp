@@ -6,6 +6,8 @@
 #include "../GameInstance/WnSGameInstance.h"
 #include "../ConfigFiles/GameConfig.h"
 #include "UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
+#include "WokeAndShoot/GameComponents/Widgets/KillFeedWidget.h"
+#include "Camera/CameraComponent.h"
 #include "WokeAndShootPlayerController.h"
 #include "WokeAndShoot/ServerComponents/PlayerState/MyPlayerState.h"
 #include "WokeAndShoot/DevTools/MyReadWriteHelper.h"
@@ -24,6 +26,8 @@ void AWokeAndShootPlayerController::BeginPlay()
     // Updating playername on the server client
     if(IsLocalPlayerController())
     {
+        KillFeed = Cast<UKillFeedWidget>(CreateWidget(this, KillFeedClass));
+        KillFeed->AddToViewport();
         if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
         {
             if(auto MyPlayerState = GetPlayerState<AMyPlayerState>())
@@ -68,27 +72,6 @@ void AWokeAndShootPlayerController::OnRep_PlayerState()
         {
             Server_ChangeName(MyGameInstance->GetPlayerName());    
         }  
-    }
-}
-
-void AWokeAndShootPlayerController::OnPossess(APawn* InPawn) 
-{
-    Super::OnPossess(InPawn);
-
-    IsPossessing = true;
-
-    // Runs only for server player.
-    if(IsLocalPlayerController())
-    {
-        if (HUD == nullptr)
-        {
-            HUD = Cast<UUserWidget>(CreateWidget(this, HUDClass));
-            HUD->AddToViewport();
-        }
-        else
-        {
-            HUD->SetVisibility(ESlateVisibility::Visible);
-        }
     }
 }
 
@@ -141,16 +124,21 @@ void AWokeAndShootPlayerController::ClientReceiveDeath()
 {
     IsPossessing = false;
     
-
-    
     if(IsLocalPlayerController())
     {
         HideHUD();
         ShowDeathScreen();
-        
+        SetViewTargetWithBlend(this,0.5f);
     }   
 }
 
+void AWokeAndShootPlayerController::ClientReceiveKillInfo(const FKillInfo& NewKillInfo) 
+{
+    if(IsLocalPlayerController())
+    {
+        KillFeed->NewKillEvent(NewKillInfo.KillerName,NewKillInfo.KilledName);
+    }
+}
 
 void AWokeAndShootPlayerController::ShowDeathScreen() 
 {

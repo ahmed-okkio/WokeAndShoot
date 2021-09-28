@@ -11,6 +11,11 @@ struct PlayerInformation
 	FString PlayerName;
 	int32 Score = 0;
 };
+struct KillInfo
+{
+	FString KillerName;
+	FString KilledName;
+};
 
 UCLASS(minimalapi)
 class AWokeAndShootGameMode : public AGameModeBase
@@ -19,11 +24,14 @@ class AWokeAndShootGameMode : public AGameModeBase
 
 private:
 	FTimerHandle DespawnBodyTH;
+	TArray<KillInfo> KillInfoList;
+	uint8 ServerKillCount;
 
 private:
 	UFUNCTION()
 	void DespawnBody(AWokeAndShootPlayerController* KilledController);
 	void Respawn(AWokeAndShootPlayerController* PlayerController);
+	void PushKillFeedToPlayers(KillInfo NewKillInfo);
 
 protected:
 	bool GameOver = false;
