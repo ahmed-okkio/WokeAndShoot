@@ -6,7 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "WokeAndShootPlayerController.generated.h"
 
-
+class UCameraComponent;
+struct FKillInfo;
 UCLASS()
 class WOKEANDSHOOT_API AWokeAndShootPlayerController : public APlayerController
 {
@@ -15,25 +16,38 @@ class WOKEANDSHOOT_API AWokeAndShootPlayerController : public APlayerController
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UDeathScreenWidget> DeathScreenClass;
-	UPROPERTY()
-	UDeathScreenWidget* DeathScreen = nullptr;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> EscapeScreenClass;
-	UPROPERTY()
-	UUserWidget* EscapeScreen = nullptr;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> ScoreboardClass;
-	UPROPERTY()
-	UUserWidget* Scoreboard = nullptr;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> HUDClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UKillFeedWidget> KillFeedClass;
+
+	UPROPERTY()
+	UDeathScreenWidget* DeathScreen = nullptr;
+
+	UPROPERTY()
+	UUserWidget* EscapeScreen = nullptr;
+
+	UPROPERTY()
+	UUserWidget* Scoreboard = nullptr;
+
 	UPROPERTY()
 	UUserWidget* HUD = nullptr;
 
+	UPROPERTY()
+	UKillFeedWidget* KillFeed = nullptr;
+
 	FString PlayerName;
+
 	float InternalSensitivity;
-	
+
 	bool IsPossessing = false;
 
 protected:
@@ -41,7 +55,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void SetupInputComponent() override;
 	virtual void OnRep_PlayerState() override;
-	virtual void OnPossess(APawn* InPawn) override;
 
 private:
 	AWokeAndShootPlayerController();
@@ -57,6 +70,7 @@ private:
 public:
 	void ClientReceiveSpawn();
 	void ClientReceiveDeath();
+	void ClientReceiveKillInfo(const FKillInfo& NewKillInfo);
 	
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;

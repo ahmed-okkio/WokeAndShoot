@@ -14,6 +14,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, LastKilledBy, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, NewPawn, SharedParams);
+    DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, CurrentKillInfo, SharedParams);
     
 }
 
@@ -30,6 +31,14 @@ void AMyPlayerState::OnRep_Respawn()
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->ClientReceiveSpawn();
+    }
+}
+
+void AMyPlayerState::OnRep_KillFeed() 
+{
+    if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
+    {
+        PlayerController->ClientReceiveKillInfo(CurrentKillInfo);
     }
 }
 

@@ -1,4 +1,4 @@
-Rename LocalOnPossess and UnPossess.
-Look into death notifications for server player and client players.
+RPC death animation.
+
 
 Refactor with auto keyword.
