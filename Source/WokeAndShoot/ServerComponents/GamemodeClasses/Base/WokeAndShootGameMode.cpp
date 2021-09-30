@@ -36,7 +36,6 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 	{
 		KilledController->ClientReceiveDeath();
 	}
-	
 }
 
 void AWokeAndShootGameMode::BeginPlay() 
@@ -74,27 +73,35 @@ void AWokeAndShootGameMode::UpdateScore(AController* Killer)
 	if(ScoreLimit && CurrentPlayerScore == MaxScore)
 	{
 		GameOver = true;
-		RestartGame();
+		EndGame();
 	}
 }
 
-void AWokeAndShootGameMode::RestartGame() 
+void AWokeAndShootGameMode::EndGame() 
 {
 	for( FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator )
 	{
-		APlayerController* PlayerController = Iterator->Get();
-		if(PlayerController == nullptr){return;}
+		if(auto PlayerController = Cast<AWokeAndShootPlayerController>(Iterator->Get()))
+		{	
+			if(APawn* PlayerPawn = PlayerController->GetPawn())
+			{
+				// PlayerPawn->DetachFromControllerPendingDestroy();
+				// PlayerPawn->Destroy();
 
-		if(APawn* PlayerPawn = PlayerController->GetPawn())
-		{
-			PlayerPawn->DetachFromControllerPendingDestroy();
-			PlayerPawn->Destroy();
+				PlayerController->Multi_ClientEndGame();
+				if(PlayerController->HasAuthority())
+				{
+					PlayerController->ClientEndGame();
+				}
+			}
 		}
 	}
 }
 
 void AWokeAndShootGameMode::DespawnBody(AWokeAndShootPlayerController* Killed) 
 {
+	if(GameOver){return;}
+
     PlayersAlive--;
 
 	if(APawn* KilledPawn = Killed->GetPawn())

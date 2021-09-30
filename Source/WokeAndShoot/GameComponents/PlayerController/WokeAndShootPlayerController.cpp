@@ -84,7 +84,7 @@ void AWokeAndShootPlayerController::ShowEscapeMenu()
     if (EscapeScreen == nullptr)
     {
         EscapeScreen = Cast<UUserWidget>(CreateWidget(this, EscapeScreenClass));
-        EscapeScreen->AddToViewport();
+        EscapeScreen->AddToViewport(1);
     }
 
     UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this,EscapeScreen);
@@ -104,7 +104,7 @@ void AWokeAndShootPlayerController::ShowScoreboard()
 
 void AWokeAndShootPlayerController::HideScoreboard() 
 {
-    if (Scoreboard == nullptr){return;}
+    if (Scoreboard == nullptr || GameIsOver){return;}
     Scoreboard->SetVisibility(ESlateVisibility::Hidden);
 }
 
@@ -126,10 +126,19 @@ void AWokeAndShootPlayerController::ClientReceiveDeath()
     
     if(IsLocalPlayerController())
     {
-        HideHUD();
-        ShowDeathScreen();
-        ClientHandlePawnDeath();
-    }   
+        if(GameIsOver)
+        {
+            HideHUD();
+            ClientHandlePawnDeath();
+            ClientSetCameraFade(false);
+        }
+        else
+        {
+            HideHUD();
+            ShowDeathScreen();
+            ClientHandlePawnDeath();
+        }
+    }
 }
 
 void AWokeAndShootPlayerController::ClientReceiveKillInfo(const FKillInfo& NewKillInfo) 
@@ -204,6 +213,22 @@ void AWokeAndShootPlayerController::ClientHandlePawnDeath()
     }
 }
 
+void AWokeAndShootPlayerController::ClientEndGame() 
+{
+    if(IsLocalPlayerController())
+    {
+        GameIsOver = true;
+        ClientSetCameraFade(false);
+        ClientIgnoreLookInput(true);
+        ClientIgnoreMoveInput(true);
+        GoToEndGameView();
+        HideHUD();
+        FTimerHandle MyTH;
+        GetWorldTimerManager().SetTimer(MyTH, this, &AWokeAndShootPlayerController::ShowScoreboard, 6.0f, false);
+    }
+    
+}
+
 FString AWokeAndShootPlayerController::GetLocalPlayerName() const
 {
     return PlayerName;
@@ -246,6 +271,16 @@ void AWokeAndShootPlayerController::SetSensitivity(float NewSensitivity)
             WnSCharacter->SetCharacterSensitivity();
         }
     }
+}
+
+bool AWokeAndShootPlayerController::Multi_ClientEndGame_Validate() 
+{
+    return true;
+}
+
+void AWokeAndShootPlayerController::Multi_ClientEndGame_Implementation() 
+{
+    ClientEndGame();
 }
 
 bool AWokeAndShootPlayerController::Server_ChangeName_Validate(const FString& NewName) 
