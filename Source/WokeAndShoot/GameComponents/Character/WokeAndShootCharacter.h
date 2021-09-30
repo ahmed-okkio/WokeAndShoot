@@ -21,18 +21,6 @@ class AWokeAndShootCharacter : public ACharacter
 {
 	GENERATED_BODY()
 private:
-	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
-	USkeletalMeshComponent* Mesh1P;
-
-	/** Gun mesh: 1st person view (seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	USkeletalMeshComponent* FP_Gun;
-
-	/** Gun mesh: 1st person view (seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	USkeletalMeshComponent* TP_Body;
-
 	/** Location on gun mesh where projectiles should spawn. */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USceneComponent* FP_MuzzleLocation;
@@ -127,14 +115,6 @@ private:
 	bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
 	void Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
-	// UFUNCTION(NetMulticast,Reliable,WithValidation)
-	// void Multi_RelayDeath(float Pitch);
-	// bool Multi_RelayDeath_Validate(float Pitch);
-	// void Multi_RelayDeath_Implementation(float Pitch);
-
-
-
-
 protected:
 
 	virtual void BeginPlay();
@@ -159,8 +139,6 @@ protected:
 
 	void JumpHandler(float Val);
 
-	void HandleDeath();
-
 	/**
 	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -177,6 +155,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category=Camera)
 	float Sensitivity = 0.5;
+
+	/** Pawn mesh: 1st person view (arms; seen only by self) */
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category=Mesh)
+	USkeletalMeshComponent* Mesh1P;
+
+	/** Gun mesh: 1st person view (seen only by self) */
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Mesh)
+	USkeletalMeshComponent* FP_Gun;
+	
+	/** Gun mesh: 1st person view (seen only by self) */
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Mesh)
+	USkeletalMeshComponent* TP_Body;
 
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
@@ -231,10 +221,17 @@ public:
 
 	virtual void Landed(const FHitResult & Hit) override;
 
+
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;
 
 	void SetCharacterSensitivity();
+
+	void PawnHandleDeath();
+
+	// Events
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player Events")
+	void DeathEvent();
 
 public:
 ///////////////////////////////////////////////////////////////////////////////////////

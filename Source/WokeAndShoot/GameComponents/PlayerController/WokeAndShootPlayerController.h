@@ -71,6 +71,7 @@ public:
 	void ClientReceiveSpawn();
 	void ClientReceiveDeath();
 	void ClientReceiveKillInfo(const FKillInfo& NewKillInfo);
+	void ClientHandlePawnDeath();
 	
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;
