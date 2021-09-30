@@ -20,6 +20,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 
 void AMyPlayerState::OnRep_KilledBy() 
 {
+
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->ClientReceiveDeath();

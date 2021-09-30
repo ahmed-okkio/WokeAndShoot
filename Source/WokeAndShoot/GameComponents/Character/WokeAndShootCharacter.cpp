@@ -266,11 +266,6 @@ void AWokeAndShootCharacter::JumpHandler(float Val)
 	}
 }
 
-void AWokeAndShootCharacter::HandleDeath() 
-{
-	CharacterMovement->DisableMovement();
-}
-
 void AWokeAndShootCharacter::LookUpDown(float Rate)
 {
 	APawn::AddControllerPitchInput(Sensitivity * Rate);
@@ -319,6 +314,12 @@ void AWokeAndShootCharacter::SetCharacterSensitivity()
 	{
 		Sensitivity = MyGameInstance->GetPlayerSensitivity();
 	}
+}
+
+void AWokeAndShootCharacter::PawnHandleDeath() 
+{
+	CharacterMovement->DisableMovement();
+	DeathEvent();
 }
 
 // Initialization functions

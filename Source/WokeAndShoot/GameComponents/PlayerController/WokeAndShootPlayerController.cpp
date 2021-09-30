@@ -15,7 +15,6 @@
 void AWokeAndShootPlayerController::BeginPlay() 
 {
     Super::BeginPlay();
-
     if(AWokeAndShootGameMode* Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
     {
         PlayerInformation CurrentPlayer {PlayerName};
@@ -115,6 +114,7 @@ void AWokeAndShootPlayerController::ClientReceiveSpawn()
 
     if(IsLocalPlayerController())
     {
+        ClientSetCameraFade(false);
         HideDeathScreen();
         ShowHUD();
     }
@@ -128,7 +128,7 @@ void AWokeAndShootPlayerController::ClientReceiveDeath()
     {
         HideHUD();
         ShowDeathScreen();
-        SetViewTargetWithBlend(this,0.5f);
+        ClientHandlePawnDeath();
     }   
 }
 
@@ -190,6 +190,17 @@ void AWokeAndShootPlayerController::HideHUD()
     if (HUD != nullptr)
     {
         HUD->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void AWokeAndShootPlayerController::ClientHandlePawnDeath() 
+{
+    if(IsLocalPlayerController())
+    {
+        if(auto WnSCharacter = Cast<AWokeAndShootCharacter>(GetPawn()))
+        {
+            WnSCharacter->PawnHandleDeath();
+        }
     }
 }
 
