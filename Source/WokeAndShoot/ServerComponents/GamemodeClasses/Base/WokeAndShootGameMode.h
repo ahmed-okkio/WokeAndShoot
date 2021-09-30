@@ -40,7 +40,7 @@ protected:
 	virtual void BeginPlay()override;
 	void UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController);
 	void UpdateScore(AController* Killer);
-	void RestartGame();
+	void EndGame();
 
 public:
 	UPROPERTY(EditAnywhere)

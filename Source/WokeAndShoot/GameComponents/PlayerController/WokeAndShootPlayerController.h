@@ -49,6 +49,8 @@ private:
 	float InternalSensitivity;
 
 	bool IsPossessing = false;
+	
+	bool GameIsOver = false;
 
 protected:
 	virtual void BeginPlay()override;
@@ -72,6 +74,8 @@ public:
 	void ClientReceiveDeath();
 	void ClientReceiveKillInfo(const FKillInfo& NewKillInfo);
 	void ClientHandlePawnDeath();
+	void ClientEndGame();
+	
 	
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;
@@ -83,6 +87,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Player Settings")
 	void SetSensitivity(float NewSensitivity);
 
+	// Events
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player Events")
+	void GoToEndGameView();
+
+	// Network
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_ClientEndGame();
+	bool Multi_ClientEndGame_Validate();
+	void Multi_ClientEndGame_Implementation();
 private:
 	// Network
 	UFUNCTION(Server,Reliable,WithValidation)
