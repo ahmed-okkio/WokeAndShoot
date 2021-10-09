@@ -32,6 +32,7 @@ private:
 	void DespawnBody(AWokeAndShootPlayerController* KilledController);
 	void Respawn(AWokeAndShootPlayerController* PlayerController);
 	void PushKillFeedToPlayers(KillInfo NewKillInfo);
+	void RestartAllPlayerControllers();
 
 protected:
 	bool GameOver = false;
@@ -41,6 +42,8 @@ protected:
 	void UpdateKillerName(AWokeAndShootPlayerController* KilledController, AWokeAndShootPlayerController* KillerController);
 	void UpdateScore(AController* Killer);
 	void EndGame();
+	void RestartGame();
+	
 
 public:
 	UPROPERTY(EditAnywhere)

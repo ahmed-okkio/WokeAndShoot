@@ -52,6 +52,8 @@ private:
 	
 	bool GameIsOver = false;
 
+	bool InternalIsDead = false;
+
 protected:
 	virtual void BeginPlay()override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -75,8 +77,8 @@ public:
 	void ClientReceiveKillInfo(const FKillInfo& NewKillInfo);
 	void ClientHandlePawnDeath();
 	void ClientEndGame();
-	
-	
+	void ClientRestartGame();
+
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	FString GetLocalPlayerName() const;
 	UFUNCTION(BlueprintCallable, Category="Player Information")
@@ -87,15 +89,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Player Settings")
 	void SetSensitivity(float NewSensitivity);
 
+	void SetPlayerIsDead(bool IsDead);
+	bool GetPlayerIsDead();
+
 	// Events
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player Events")
 	void GoToEndGameView();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player Events")
+	void GoToStartGameView();
 
 	// Network
 	UFUNCTION(NetMulticast,Reliable,WithValidation)
 	void Multi_ClientEndGame();
 	bool Multi_ClientEndGame_Validate();
 	void Multi_ClientEndGame_Implementation();
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_ClientRestartGame();
+	bool Multi_ClientRestartGame_Validate();
+	void Multi_ClientRestartGame_Implementation();
 private:
 	// Network
 	UFUNCTION(Server,Reliable,WithValidation)

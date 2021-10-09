@@ -229,6 +229,19 @@ void AWokeAndShootPlayerController::ClientEndGame()
     
 }
 
+void AWokeAndShootPlayerController::ClientRestartGame() 
+{
+    if(IsLocalPlayerController())
+    {
+        GameIsOver = false;
+        ClientIgnoreLookInput(false);
+        ClientIgnoreMoveInput(false);
+        GoToStartGameView();
+        ShowHUD();
+        HideScoreboard();
+    }
+}
+
 FString AWokeAndShootPlayerController::GetLocalPlayerName() const
 {
     return PlayerName;
@@ -273,6 +286,16 @@ void AWokeAndShootPlayerController::SetSensitivity(float NewSensitivity)
     }
 }
 
+void AWokeAndShootPlayerController::SetPlayerIsDead(bool IsDead) 
+{
+    InternalIsDead = IsDead;
+}
+
+bool AWokeAndShootPlayerController::GetPlayerIsDead() 
+{
+    return InternalIsDead;
+}
+
 bool AWokeAndShootPlayerController::Multi_ClientEndGame_Validate() 
 {
     return true;
@@ -281,6 +304,16 @@ bool AWokeAndShootPlayerController::Multi_ClientEndGame_Validate()
 void AWokeAndShootPlayerController::Multi_ClientEndGame_Implementation() 
 {
     ClientEndGame();
+}
+
+bool AWokeAndShootPlayerController::Multi_ClientRestartGame_Validate() 
+{
+    return true;
+}
+
+void AWokeAndShootPlayerController::Multi_ClientRestartGame_Implementation() 
+{
+    ClientRestartGame();
 }
 
 bool AWokeAndShootPlayerController::Server_ChangeName_Validate(const FString& NewName) 
