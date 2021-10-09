@@ -23,10 +23,19 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 	AWokeAndShootPlayerController* KilledController = Cast<AWokeAndShootPlayerController>(Killed);
 	if(KilledController == nullptr){return;}
 
+	if(KilledController->GetPlayerIsDead()){return;}
+		
+
 	//Despawning body
 	FTimerDelegate TimerDel;
 	TimerDel.BindUFunction(this,FName("DespawnBody"), KilledController);
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
+	
+	if(KilledController->HasAuthority())
+	{
+		KilledController->SetPlayerIsDead(true);
+
+	}
 
 	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer);
@@ -83,19 +92,18 @@ void AWokeAndShootGameMode::EndGame()
 	{
 		if(auto PlayerController = Cast<AWokeAndShootPlayerController>(Iterator->Get()))
 		{	
-			if(APawn* PlayerPawn = PlayerController->GetPawn())
-			{
-				// PlayerPawn->DetachFromControllerPendingDestroy();
-				// PlayerPawn->Destroy();
-
-				PlayerController->Multi_ClientEndGame();
-				if(PlayerController->HasAuthority())
-				{
-					PlayerController->ClientEndGame();
-				}
-			}
+			PlayerController->Multi_ClientEndGame();
 		}
 	}
+	FTimerHandle MyTH;
+	GetWorldTimerManager().SetTimer(MyTH, this, &AWokeAndShootGameMode::RestartGame, 25.0f, false);
+}
+
+void AWokeAndShootGameMode::RestartGame() 
+{
+	GameOver = false;
+	ResetLevel();
+	RestartAllPlayerControllers();
 }
 
 void AWokeAndShootGameMode::DespawnBody(AWokeAndShootPlayerController* Killed) 
@@ -125,7 +133,10 @@ void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerControl
 
     if(auto PlayerCharacter = GetWorld()->SpawnActor<AWokeAndShootCharacter>(DefaultPawnClass,SpawnLocation,SpawnRotation))
     {
+		PlayerController->SetPlayerIsDead(false);
+
         PlayerController->GetPlayerState<AMyPlayerState>()->NewPawn = PlayerCharacter;
+
 		// Possess new pawn(respawn)
 		PlayerController->Possess(PlayerCharacter);
 
@@ -135,6 +146,10 @@ void AWokeAndShootGameMode::Respawn(AWokeAndShootPlayerController* PlayerControl
 			PlayerController->ClientReceiveSpawn();
 		}
     }
+	else
+	{
+		Respawn(PlayerController);
+	}
 }
 
 void AWokeAndShootGameMode::PushKillFeedToPlayers(KillInfo NewKillInfo) 
@@ -157,4 +172,23 @@ void AWokeAndShootGameMode::PushKillFeedToPlayers(KillInfo NewKillInfo)
 			}
      	}
 }
+}
+
+void AWokeAndShootGameMode::RestartAllPlayerControllers() 
+{
+	for( FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator )
+	{
+		if(auto PlayerController = Cast<AWokeAndShootPlayerController>(Iterator->Get()))
+		{
+			if(APawn* PlayerPawn = PlayerController->GetPawn())
+			{
+				PlayerPawn->DetachFromControllerPendingDestroy();
+				PlayerPawn->Destroy();
+			}
+
+			Respawn(PlayerController);
+
+			PlayerController->Multi_ClientRestartGame();
+		}
+	}
 }
