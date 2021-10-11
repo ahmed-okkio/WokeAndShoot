@@ -27,6 +27,8 @@ public:
 
 	LoadedPlayerData LoadedPlayerData;
 
+	FString LastServerIP;
+
 public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
@@ -38,6 +40,10 @@ public:
 	UFUNCTION(BlueprintPure, Category="Player Information")
 	float GetPlayerSensitivity() const;
 	void SetPlayerSensitvity(float NewPlayerSensitivity);
+	UFUNCTION(BlueprintPure, Category="Main Menu")
+	FString GetSavedIP() const;
+	UFUNCTION(BlueprintCallable, Category="Main Menu")
+	void SetSavedIP(const FString& NewServerIP);
 
 	UFUNCTION(BlueprintCallable, Category="Player Information")
 	void LoadPlayerData();

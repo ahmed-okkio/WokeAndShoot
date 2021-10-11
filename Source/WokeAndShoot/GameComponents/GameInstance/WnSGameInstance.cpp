@@ -26,6 +26,7 @@ void UWnSGameInstance::Shutdown()
     {
         PlayerData->Cfg_PlayerName = LoadedPlayerData.PlayerName;
         PlayerData->Cfg_PlayerSensitivity = LoadedPlayerData.PlayerSensitivity;
+        PlayerData->Cfg_LastServerIP = LastServerIP;
         PlayerData->SaveConfig();
     }
 }
@@ -54,6 +55,16 @@ void UWnSGameInstance::SetPlayerSensitvity(float NewPlayerSensitivity)
     LoadedPlayerData.PlayerSensitivity = NewPlayerSensitivity;
 }
 
+FString UWnSGameInstance::GetSavedIP() const
+{
+    return LastServerIP;
+}
+
+void UWnSGameInstance::SetSavedIP(const FString& NewServerIP)
+{
+    LastServerIP = NewServerIP;
+}
+
 void UWnSGameInstance::LoadPlayerData() 
 {
     if(PlayerData->Cfg_PlayerName.IsEmpty())
@@ -68,5 +79,5 @@ void UWnSGameInstance::LoadPlayerData()
 
     LoadedPlayerData.PlayerName = PlayerData->Cfg_PlayerName;
     LoadedPlayerData.PlayerSensitivity = PlayerData->Cfg_PlayerSensitivity;
-    GLog->Log("LoadedPlayerData for: " + LoadedPlayerData.PlayerName);
+    LastServerIP = PlayerData->Cfg_LastServerIP;
 }
