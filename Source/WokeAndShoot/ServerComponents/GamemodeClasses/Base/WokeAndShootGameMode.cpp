@@ -58,7 +58,7 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 	{
 		if(auto KillerPlayerState = KillerController->PlayerState)
 		{
-			KillInfo CurrentKillInfo {KillerPlayerState->GetPlayerName(),KilledPlayerState->GetPlayerName()};
+			KillInfo CurrentKillInfo {KillerPlayerState->GetPlayerName(),KilledPlayerState->GetPlayerName(),KilledPlayerState->NetworkPlayerId};
 			ServerKillCount++;
 			KillInfoList.Add(CurrentKillInfo);
 			PushKillFeedToPlayers(CurrentKillInfo);
@@ -104,6 +104,16 @@ void AWokeAndShootGameMode::RestartGame()
 	GameOver = false;
 	ResetLevel();
 	RestartAllPlayerControllers();
+}
+
+void AWokeAndShootGameMode::PostLogin(APlayerController* NewPlayer) 
+{
+	Super::PostLogin(NewPlayer);
+
+	if(auto PlayerState = NewPlayer->GetPlayerState<AMyPlayerState>())
+	{
+		PlayerState->NetworkPlayerId = NewPlayer->GetUniqueID();
+	}
 }
 
 void AWokeAndShootGameMode::DespawnBody(AWokeAndShootPlayerController* Killed) 
@@ -161,13 +171,13 @@ void AWokeAndShootGameMode::PushKillFeedToPlayers(KillInfo NewKillInfo)
 		{
 			if(auto PlayerState = PlayerController->GetPlayerState<AMyPlayerState>())
 			{
-				PlayerState->CurrentKillInfo = FKillInfo {NewKillInfo.KillerName,NewKillInfo.KilledName,ServerKillCount};
+				PlayerState->CurrentKillInfo = FKillInfo {NewKillInfo.KillerName, NewKillInfo.KilledName, NewKillInfo.KilledPlayerId, ServerKillCount};
 				PlayerController->ForceNetUpdate();
 
 				//Call for server player to receive KillInfo
 				if(PlayerController->IsLocalPlayerController() && PlayerController->HasAuthority())
 				{
-					PlayerController->ClientReceiveKillInfo(FKillInfo {NewKillInfo.KillerName,NewKillInfo.KilledName,ServerKillCount});
+					PlayerController->ClientReceiveKillInfo(FKillInfo {NewKillInfo.KillerName, NewKillInfo.KilledName, NewKillInfo.KilledPlayerId, ServerKillCount});
 				}
 			}
      	}

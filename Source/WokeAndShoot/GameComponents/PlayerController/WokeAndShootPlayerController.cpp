@@ -159,7 +159,7 @@ void AWokeAndShootPlayerController::ShowDeathScreen()
         {
             if(auto MyPlayerState = GetPlayerState<AMyPlayerState>())
             {
-                DeathScreen->KillerName = MyPlayerState->LastKilledBy;
+                DeathScreen->KillerName = MyPlayerState->CurrentKillInfo.KilledName;
                 DeathScreen->AddToViewport();
             }
         }

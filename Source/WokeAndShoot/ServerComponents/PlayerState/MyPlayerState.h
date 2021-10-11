@@ -19,6 +19,8 @@ struct FKillInfo
 	UPROPERTY()
 	FString KilledName;
 	UPROPERTY()
+	int32 KilledPlayerId;
+	UPROPERTY()
 	uint8 KillCount;
 };
 UCLASS()
@@ -38,7 +40,7 @@ private:
 public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_KilledBy )
-	FString LastKilledBy = "";
+	int32 NetworkPlayerId;
 	UPROPERTY(ReplicatedUsing = OnRep_Respawn )
 	APawn* NewPawn = nullptr;
 	UPROPERTY(ReplicatedUsing = OnRep_KillFeed)

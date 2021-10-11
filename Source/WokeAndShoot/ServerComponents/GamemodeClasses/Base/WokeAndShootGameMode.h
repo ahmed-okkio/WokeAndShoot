@@ -15,6 +15,7 @@ struct KillInfo
 {
 	FString KillerName;
 	FString KilledName;
+	int32 KilledPlayerId;
 };
 
 UCLASS(minimalapi)
@@ -43,6 +44,7 @@ protected:
 	void UpdateScore(AController* Killer);
 	void EndGame();
 	void RestartGame();
+	virtual void PostLogin(APlayerController* NewPlayer);
 	
 
 public:

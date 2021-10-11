@@ -12,7 +12,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
     FDoRepLifetimeParams SharedParams;
 	SharedParams.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, LastKilledBy, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, NetworkPlayerId, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, NewPawn, SharedParams);
     DOREPLIFETIME_WITH_PARAMS_FAST(AMyPlayerState, CurrentKillInfo, SharedParams);
     
@@ -40,7 +40,8 @@ void AMyPlayerState::OnRep_KillFeed()
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->ClientReceiveKillInfo(CurrentKillInfo);
-        if(GetPlayerName() == CurrentKillInfo.KilledName)
+        
+        if(NetworkPlayerId == CurrentKillInfo.KilledPlayerId)
         {
             PlayerController->ClientReceiveDeath();
         }
