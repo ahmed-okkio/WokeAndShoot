@@ -17,7 +17,7 @@ public:
 	UPROPERTY(Config)
 	float Cfg_PlayerSensitivity;
 	UPROPERTY(Config)
-	FString Cfg_LastServerIP
+	FString Cfg_LastServerIP;
 public:	
 	AGameConfig();
 };

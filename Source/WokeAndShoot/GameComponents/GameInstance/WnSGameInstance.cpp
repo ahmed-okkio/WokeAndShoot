@@ -55,6 +55,16 @@ void UWnSGameInstance::SetPlayerSensitvity(float NewPlayerSensitivity)
     LoadedPlayerData.PlayerSensitivity = NewPlayerSensitivity;
 }
 
+FString UWnSGameInstance::GetSavedIP() const
+{
+    return LastServerIP;
+}
+
+void UWnSGameInstance::SetSavedIP(const FString& NewServerIP)
+{
+    LastServerIP = NewServerIP;
+}
+
 void UWnSGameInstance::LoadPlayerData() 
 {
     if(PlayerData->Cfg_PlayerName.IsEmpty())
