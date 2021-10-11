@@ -27,6 +27,8 @@ public:
 
 	LoadedPlayerData LoadedPlayerData;
 
+	FString LastServerIP = "";
+
 public:
 	virtual void Init() override;
 	virtual void Shutdown() override;

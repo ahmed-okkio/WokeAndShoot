@@ -26,6 +26,7 @@ void UWnSGameInstance::Shutdown()
     {
         PlayerData->Cfg_PlayerName = LoadedPlayerData.PlayerName;
         PlayerData->Cfg_PlayerSensitivity = LoadedPlayerData.PlayerSensitivity;
+        PlayerData->Cfg_LastServerIP = LastServerIP;
         PlayerData->SaveConfig();
     }
 }
@@ -68,5 +69,5 @@ void UWnSGameInstance::LoadPlayerData()
 
     LoadedPlayerData.PlayerName = PlayerData->Cfg_PlayerName;
     LoadedPlayerData.PlayerSensitivity = PlayerData->Cfg_PlayerSensitivity;
-    GLog->Log("LoadedPlayerData for: " + LoadedPlayerData.PlayerName);
+    LastServerIP = PlayerData->Cfg_LastServerIP;
 }
