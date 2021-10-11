@@ -23,7 +23,7 @@ void AMyPlayerState::OnRep_KilledBy()
 
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
-        PlayerController->ClientReceiveDeath();
+        // PlayerController->ClientReceiveDeath();
     }
 }
 
@@ -40,6 +40,10 @@ void AMyPlayerState::OnRep_KillFeed()
     if(auto PlayerController = Cast<AWokeAndShootPlayerController>(GetOwner()))
     {
         PlayerController->ClientReceiveKillInfo(CurrentKillInfo);
+        if(GetPlayerName() == CurrentKillInfo.KilledName)
+        {
+            PlayerController->ClientReceiveDeath();
+        }
     }
 }
 

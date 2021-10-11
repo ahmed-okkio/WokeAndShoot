@@ -62,7 +62,7 @@ void AWokeAndShootGameMode::UpdateKillerName(AWokeAndShootPlayerController* Kill
 			ServerKillCount++;
 			KillInfoList.Add(CurrentKillInfo);
 			PushKillFeedToPlayers(CurrentKillInfo);
-			KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
+			// KilledPlayerState->LastKilledBy = KillerPlayerState->GetPlayerName();
 			KilledPlayerState->ForceNetUpdate();
 
 		}
