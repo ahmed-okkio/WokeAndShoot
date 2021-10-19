@@ -24,9 +24,9 @@ class AWokeAndShootGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 private:
-	FTimerHandle DespawnBodyTH;
 	TArray<KillInfo> KillInfoList;
 	uint8 ServerKillCount;
+	
 
 private:
 	UFUNCTION()
@@ -51,7 +51,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 MaxScore = 2;
 	UPROPERTY(EditAnywhere)
-	bool ScoreLimit = true;
+	bool bScoreLimit = true;
 	UPROPERTY(EditAnywhere)
 	float RespawnTimer = 3.f;
 

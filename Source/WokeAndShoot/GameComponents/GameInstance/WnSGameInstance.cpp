@@ -21,14 +21,7 @@ void UWnSGameInstance::Shutdown()
 {
     Super::Shutdown();
 
-    // Save changes on shutdown
-    if(!LoadedPlayerData.PlayerName.IsEmpty() && LoadedPlayerData.PlayerSensitivity >= 0)
-    {
-        PlayerData->Cfg_PlayerName = LoadedPlayerData.PlayerName;
-        PlayerData->Cfg_PlayerSensitivity = LoadedPlayerData.PlayerSensitivity;
-        PlayerData->Cfg_LastServerIP = LastServerIP;
-        PlayerData->SaveConfig();
-    }
+    SaveToFile();
 }
 
 void UWnSGameInstance::StartGameInstance() 
@@ -80,4 +73,16 @@ void UWnSGameInstance::LoadPlayerData()
     LoadedPlayerData.PlayerName = PlayerData->Cfg_PlayerName;
     LoadedPlayerData.PlayerSensitivity = PlayerData->Cfg_PlayerSensitivity;
     LastServerIP = PlayerData->Cfg_LastServerIP;
+}
+
+void UWnSGameInstance::SaveToFile() 
+{
+    // Save changes on shutdown
+    if(!LoadedPlayerData.PlayerName.IsEmpty() && LoadedPlayerData.PlayerSensitivity >= 0)
+    {
+        PlayerData->Cfg_PlayerName = LoadedPlayerData.PlayerName;
+        PlayerData->Cfg_PlayerSensitivity = LoadedPlayerData.PlayerSensitivity;
+        PlayerData->Cfg_LastServerIP = LastServerIP;
+        PlayerData->SaveConfig();
+    }
 }

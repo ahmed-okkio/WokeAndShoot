@@ -52,6 +52,10 @@ private:
 
 	FVector WishDir;
 
+	bool ToggleSpawnAnim = true;
+	bool ToggleShotAnim = false;
+	bool AnimState = true;
+
 private:
 	// Initialization
 	void CreateCameraComp();
@@ -60,7 +64,7 @@ private:
 
 	// Actions
 	void PlayShotSound();
-	void PlayShotAnimation();
+	void PlayShotAnimation(float DeltaTime);
 	void PlayBulletImpactAnimation(FVector HitLocation, FRotator ImpactRotation);
 	void HitScan(FHitResult& HitResult, FCollisionQueryParams& Params, FVector& StartingLocation, FVector&  EndLocation);
 
@@ -129,7 +133,7 @@ protected:
 	void OnFire();
 
 	//Draw Bullet Tracers
-	void DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation,FVector &HitResultLocation, FVector &ShotDirection, float Distance);
+	void DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation,FVector &HitResultLocation, FVector &ShotDirection);
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);

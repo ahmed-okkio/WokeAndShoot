@@ -47,5 +47,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Player Information")
 	void LoadPlayerData();
+	UFUNCTION(BlueprintCallable, Category="Player Information")
+	void SaveToFile();
 	
 };

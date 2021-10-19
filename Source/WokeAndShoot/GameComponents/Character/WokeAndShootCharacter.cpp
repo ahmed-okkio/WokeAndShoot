@@ -44,6 +44,8 @@ AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& O
 
 	// Set Health Component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	ToggleShotAnim = false;
 }
 
 void AWokeAndShootCharacter::BeginPlay()
@@ -51,7 +53,7 @@ void AWokeAndShootCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
+	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false), TEXT("GripPoint"));
 
     if(auto Gamemode = Cast<AWokeAndShootGameMode>(GetWorld()->GetAuthGameMode()))
     {
@@ -63,6 +65,20 @@ void AWokeAndShootCharacter::BeginPlay()
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
+	if(ToggleSpawnAnim)
+	{
+		FirstPersonCameraComponent->FieldOfView = FMath::Lerp(FirstPersonCameraComponent->FieldOfView,120.f,0.1);
+		if(FirstPersonCameraComponent->FieldOfView == 120.f)
+		{
+			ToggleSpawnAnim = false;
+		}
+	}
+
+	if(ToggleShotAnim)
+	{
+		GLog->Log("#383 ShotAnim "+ FString::SanitizeFloat(FirstPersonCameraComponent->FieldOfView));
+		PlayShotAnimation(DeltaTime);
+	}
 }
 
 // Input
@@ -105,7 +121,7 @@ void AWokeAndShootCharacter::Restart()
 void AWokeAndShootCharacter::OnFire()
 {
 	PlayShotSound();
-	PlayShotAnimation();
+	ToggleShotAnim = true;
 
 	// Prepare parameters for line trace and hit scan
 	FVector ViewPointLocation; 
@@ -130,6 +146,7 @@ void AWokeAndShootCharacter::OnFire()
 		if (bool bOfflineLineTrace = World->LineTraceSingleByChannel(OUT HitResult,ViewPointLocation, EndPoint, ECollisionChannel::ECC_GameTraceChannel2, Params))
 		{
 			PlayBulletImpactAnimation(HitResult.Location, ShotDirection.Rotation());
+			// DrawBulletTracers(ViewPointLocation,SpawnLocation, HitResult.Location, ShotDirection);
 
 			if(auto HitBoostPad = Cast<ABoostPad>(HitResult.GetActor()))
 			{
@@ -163,15 +180,15 @@ void AWokeAndShootCharacter::GetViewPointRotLoc(OUT FVector &ViewPointLocation, 
 }
 
 // TO DO: Rework, currently inactive
-void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation, FVector &HitResultLocation, FVector &ShotDirection, float Distance)
+void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation, FVector &HitResultLocation, FVector &ShotDirection)
 {
 	//Refactor when tracers are complete
 	UParticleSystemComponent* TracerComponent;
 	if(TracerParticle == nullptr){return;}
-	if (Distance == Range)
-	{
-		TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),TracerParticle,SpawnLocation, ShotDirection.Rotation());
-	}
+	// if (Distance == Range)
+	// {
+	// 	TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),TracerParticle,SpawnLocation, ShotDirection.Rotation());
+	// }
 	else
 	{ 		
 		TracerComponent = UGameplayStatics::SpawnEmitterAttached(TracerParticle, ProjectileSceneComp);
@@ -184,19 +201,19 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 	{
 		FVector DynamicTracerSource = SpawnLocation;
 		FVector Target =  HitResultLocation;
-		float OutDistance;
+		// float OutDistance;
 		// FTimerHandle TracerUpdateTH;
 		// FTimerDelegate UpdateTracerSourceDelegate = FTimerDelegate::CreateUObject(this,&AWokeAndShootCharacter::UpdateTracerSource, TracerComponent, DynamicTracerSource, Target);
-		TracerComponent->SetFloatParameter(TEXT("Distance"), Distance-500);
-		TracerComponent->GetFloatParameter("Distance", OutDistance);
-		UE_LOG(LogTemp,Warning, TEXT("%f"),Distance);
+		// TracerComponent->SetFloatParameter(TEXT("Distance"), Distance-500);
+		// TracerComponent->GetFloatParameter("Distance", OutDistance);
+		// UE_LOG(LogTemp,Warning, TEXT("%f"),Distance);
 		TracerComponent->SetBeamSourcePoint(0, DynamicTracerSource, 0);
 		TracerComponent->SetBeamTargetPoint(0, HitResultLocation, 0);
 		if (TracerComponent->IsActive() == false)
 		{
 			UE_LOG(LogTemp,Warning, TEXT("TEST2"));
 			TracerComponent->SetActive(true, true);
-			UE_LOG(LogTemp,Warning, TEXT("TRACER SET TO ACTIVE, Distance: %f"), Distance);
+			// UE_LOG(LogTemp,Warning, TEXT("TRACER SET TO ACTIVE, Distance: %f"), Distance);
 		}
 		DynamicSourceTest = DynamicTracerSource;
 		// GetWorld()->GetTimerManager().SetTimer(TracerUpdateTH, UpdateTracerSourceDelegate, 0.08,true);
@@ -375,16 +392,34 @@ void AWokeAndShootCharacter::PlayShotSound()
 	}
 }
 
-void AWokeAndShootCharacter::PlayShotAnimation() 
+void AWokeAndShootCharacter::PlayShotAnimation(float DeltaTime) 
 {
 	// Try and play a firing animation if specified
-	if (FireAnimation != nullptr)
+	if(AnimState)
 	{
-		if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
+		FirstPersonCameraComponent->FieldOfView = FMath::FInterpConstantTo(FirstPersonCameraComponent->FieldOfView,123.f,DeltaTime,35);
+		if(FirstPersonCameraComponent->FieldOfView > 120.9)
+			AnimState = false;
+	}
+	else if(!AnimState)
+	{
+		FirstPersonCameraComponent->FieldOfView = FMath::FInterpConstantTo(FirstPersonCameraComponent->FieldOfView,120.f,DeltaTime,20);
+		if(FirstPersonCameraComponent->FieldOfView < 120.2f)
 		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
+			ToggleShotAnim = false;
+			AnimState = true;
 		}
 	}
+	
+	// FirstPersonCameraComponent->FieldOfView-= 5.f;
+
+	// if (FireAnimation != nullptr)
+	// {
+	// 	if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
+	// 	{
+	// 		AnimInstance->Montage_Play(FireAnimation, 1.f);
+	// 	}
+	// }
 }
 
 void AWokeAndShootCharacter::PlayBulletImpactAnimation(FVector HitLocation, FRotator ImpactRotation) 

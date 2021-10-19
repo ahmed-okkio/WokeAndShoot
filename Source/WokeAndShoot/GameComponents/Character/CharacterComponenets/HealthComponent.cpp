@@ -4,6 +4,7 @@
 #include "HealthComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "../../../ServerComponents/GamemodeClasses/Base/WokeAndShootGameMode.h"
+#include "../../Character/WokeAndShootCharacter.h"
 #include "../../PlayerController/WokeAndShootPlayerController.h"
 
 
@@ -24,6 +25,8 @@ void UHealthComponent::ApplyDamage(float Damage, AController* Killer)
 	HealthPoints =	FMath::Max(DamagedHealth, 0.f);
 	if(HealthPoints == 0)
 	{
+		if(auto OwnerCharacter = Cast<AWokeAndShootCharacter>(GetOwner()))
+			OwnerCharacter->TP_Body->SetUsingAbsoluteRotation(true);	
 		Server_KillActor(Killer);
 	}
 }

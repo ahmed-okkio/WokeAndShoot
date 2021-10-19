@@ -114,6 +114,7 @@ void AWokeAndShootPlayerController::ClientReceiveSpawn()
 
     if(IsLocalPlayerController())
     {
+        ClientIgnoreMoveInput(false);
         ClientSetCameraFade(false);
         HideDeathScreen();
         ShowHUD();
@@ -134,6 +135,7 @@ void AWokeAndShootPlayerController::ClientReceiveDeath()
         }
         else
         {
+            ClientIgnoreMoveInput(true);
             HideHUD();
             ShowDeathScreen();
             ClientHandlePawnDeath();
@@ -159,7 +161,7 @@ void AWokeAndShootPlayerController::ShowDeathScreen()
         {
             if(auto MyPlayerState = GetPlayerState<AMyPlayerState>())
             {
-                DeathScreen->KillerName = MyPlayerState->CurrentKillInfo.KilledName;
+                DeathScreen->KillerName = MyPlayerState->CurrentKillInfo.KillerName;
                 DeathScreen->AddToViewport();
             }
         }
@@ -255,7 +257,7 @@ void AWokeAndShootPlayerController::SetLocalPlayerName(const FString& NewName)
         PlayerName = NewName;
         // Set online player name
         PlayerState->SetPlayerName(PlayerName);
-        // Setting player name playerdata container
+        // Setting player name : container
         if(auto MyGameInstance = Cast<UWnSGameInstance>(GetGameInstance()))
         {
             MyGameInstance->SetPlayerName(PlayerName);

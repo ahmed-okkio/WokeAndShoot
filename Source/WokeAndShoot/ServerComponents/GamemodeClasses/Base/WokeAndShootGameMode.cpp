@@ -27,6 +27,7 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 		
 
 	//Despawning body
+	FTimerHandle DespawnBodyTH;
 	FTimerDelegate TimerDel;
 	TimerDel.BindUFunction(this,FName("DespawnBody"), KilledController);
 	GetWorld()->GetTimerManager().SetTimer(DespawnBodyTH, TimerDel, 3.f, false);
@@ -79,7 +80,7 @@ void AWokeAndShootGameMode::UpdateScore(AController* Killer)
 
 	Players.Find(KillerID)->Score = CurrentPlayerScore;
 
-	if(ScoreLimit && CurrentPlayerScore == MaxScore)
+	if(bScoreLimit && CurrentPlayerScore == MaxScore)
 	{
 		GameOver = true;
 		EndGame();
