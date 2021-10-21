@@ -22,12 +22,10 @@ ABoostPad::ABoostPad()
 	PadMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoostPadMesh"));
 	PadMesh->AttachTo(CollisionComp);
 
-}
+	DefaultMaterial = CreateDefaultSubobject<UMaterialInstance>(TEXT("DefaultMaterial"));
+	PrimedMaterial = CreateDefaultSubobject<UMaterialInstance>(TEXT("PrimedMaterial"));
+	DetonatedMaterial = CreateDefaultSubobject<UMaterialInstance>(TEXT("DetonatedMaterial"));
 
-void ABoostPad::BoostPlayers(AWokeAndShootCharacter* Initiator) 
-{
-	// ApplyBoost to Local
-	ApplyBoost(Initiator);
 }
 
 void ABoostPad::BeginPlay()
@@ -39,14 +37,24 @@ void ABoostPad::InitiateCooldown(AWokeAndShootCharacter* HitActor)
 {
 	FTimerHandle TH_CooldownTimer;
 	CooldownList.AddUnique(HitActor);
-	TimerHandles.AddUnique(TH_CooldownTimer);
+	// TimerHandles.AddUnique(TH_CooldownTimer);
 
 	GetWorld()->GetTimerManager().SetTimer(TH_CooldownTimer,this,&ABoostPad::RemoveActorCD,BoostPadCooldown);	
 }
 
 void ABoostPad::RemoveActorCD() 
 {
-	CooldownList.Pop();
+	if(CooldownList.Num() > 0)
+	{
+		CooldownList.Pop();
+	}
+
+	PadMesh->SetMaterial(0,DefaultMaterial);
+}
+
+void ABoostPad::ClientResetPad() 
+{
+	PadMesh->SetMaterial(0,DefaultMaterial);
 }
 
 bool ABoostPad::WithinConeRange(FVector& PadLocation, FVector& HitActorLocation) 
@@ -77,8 +85,30 @@ FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation)
 	return ImpulseDirection;
 }
 
-void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator) 
+bool ABoostPad::ClientPrimePad(AWokeAndShootCharacter* Initiator) 
 {
+	if(!CooldownList.Contains(Initiator))
+	{	
+		PadMesh->SetMaterial(0,PrimedMaterial);
+		GetWorld()->GetTimerManager().SetTimer(TH_PadTimeOutTimer,this,&ABoostPad::ClientResetPad,BoostPadCooldown);
+		return true;	
+	}
+
+	return false;
+}
+
+void ABoostPad::DetonatePad(AWokeAndShootCharacter* Initiator) 
+{
+	if(CooldownList.Contains(Initiator)){return;}
+	// Add Cooldown
+	InitiateCooldown(Initiator);
+
+	if(Initiator->IsLocallyControlled())
+	{
+		PadMesh->SetMaterial(0,DetonatedMaterial);
+		GetWorld()->GetTimerManager().ClearTimer(TH_PadTimeOutTimer);
+	}
+
 	TArray<FHitResult> HitResults;
 	FVector SweepStart = GetActorLocation();
 	FVector SweepEnd = GetActorLocation();
@@ -95,35 +125,28 @@ void ABoostPad::ApplyBoost(AWokeAndShootCharacter* Initiator)
 			AWokeAndShootCharacter* HitActor = Cast<AWokeAndShootCharacter>(HitResult.GetActor());
 			if (HitActor != nullptr)
 			{
-				
 				FVector ActorLocation = HitActor->GetActorLocation();
 
-				if(CooldownList.Contains(HitActor)){continue;}
 				if(!WithinConeRange(SweepStart, ActorLocation)){continue;}
 
 				FVector ImpulseDirection = GetImpulseDirection(ActorLocation);
-				
-				if(HitActor->GetLocalRole() == ROLE_SimulatedProxy)
-				{
-					GLog->Log("BOOSTING SIMULATED PROXY");
-				}
-				if(!HitActor->IsLocallyControlled() && Initiator->IsLocallyControlled() && !HasAuthority())
+
+				if(HitActor != Initiator)
 				{
 					continue;
 				}
+
+				// Prime Pad
 				// Apply Impulse
 				HitActor->DirectionalImpulse(ImpulseDirection);
-				// Add Cooldown
-				InitiateCooldown(HitActor);
-
 
 				// Debug Line for Forward Facing Line
 				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
-				// GLog->Log("Character Hit");
 			}
 		}
 	}
-	DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
+	// DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
 	// GLog->Log("Fired");
 }
+
 

@@ -43,7 +43,7 @@ void AMyPlayerState::OnRep_KillFeed()
         
         if(NetworkPlayerId == CurrentKillInfo.KilledPlayerId)
         {
-            PlayerController->ClientReceiveDeath();
+            PlayerController->ClientReceiveDeath(CurrentKillInfo.KillerName);
         }
     }
 }

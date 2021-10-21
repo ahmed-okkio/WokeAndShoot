@@ -121,7 +121,7 @@ void AWokeAndShootPlayerController::ClientReceiveSpawn()
     }
 }
 
-void AWokeAndShootPlayerController::ClientReceiveDeath() 
+void AWokeAndShootPlayerController::ClientReceiveDeath(const FString& KillerName) 
 {
     IsPossessing = false;
     
@@ -137,7 +137,7 @@ void AWokeAndShootPlayerController::ClientReceiveDeath()
         {
             ClientIgnoreMoveInput(true);
             HideHUD();
-            ShowDeathScreen();
+            ShowDeathScreen(KillerName);
             ClientHandlePawnDeath();
         }
     }
@@ -151,7 +151,7 @@ void AWokeAndShootPlayerController::ClientReceiveKillInfo(const FKillInfo& NewKi
     }
 }
 
-void AWokeAndShootPlayerController::ShowDeathScreen() 
+void AWokeAndShootPlayerController::ShowDeathScreen(const FString& KillerName) 
 {
     if (DeathScreen == nullptr)
     {  
@@ -161,7 +161,7 @@ void AWokeAndShootPlayerController::ShowDeathScreen()
         {
             if(auto MyPlayerState = GetPlayerState<AMyPlayerState>())
             {
-                DeathScreen->KillerName = MyPlayerState->CurrentKillInfo.KillerName;
+                DeathScreen->KillerName = KillerName;
                 DeathScreen->AddToViewport();
             }
         }
