@@ -40,11 +40,14 @@ void AWokeAndShootGameMode::PawnKilled(AController* Killed, AController* Killer)
 
 	UpdateKillerName(KilledController, KillerController);
 	UpdateScore(Killer);
-	// KilledController->UnPossess();
+
 	// Temporary patch to notify server player he has been killed.
 	if(KilledController->IsLocalPlayerController())
 	{
-		KilledController->ClientReceiveDeath();
+		if(auto KillerPlayerState = KillerController->GetPlayerState<AMyPlayerState>())
+		{
+			KilledController->ClientReceiveDeath(KillerPlayerState->GetPlayerName());
+		}
 	}
 }
 

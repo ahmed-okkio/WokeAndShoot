@@ -66,14 +66,14 @@ private:
 	void ShowEscapeMenu();
 	void ShowScoreboard();
 	void HideScoreboard();
-	void ShowDeathScreen();
+	void ShowDeathScreen(const FString& KillerName);
 	void HideDeathScreen();
 	void ShowHUD();
 	void HideHUD();
 
 public:
 	void ClientReceiveSpawn();
-	void ClientReceiveDeath();
+	void ClientReceiveDeath(const FString& KillerName);
 	void ClientReceiveKillInfo(const FKillInfo& NewKillInfo);
 	void ClientHandlePawnDeath();
 	void ClientEndGame();

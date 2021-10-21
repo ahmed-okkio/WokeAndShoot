@@ -52,6 +52,8 @@ private:
 
 	FVector WishDir;
 
+	ABoostPad* PrimedBoostPad = nullptr;
+
 	bool ToggleSpawnAnim = true;
 	bool ToggleShotAnim = false;
 	bool AnimState = true;
@@ -114,10 +116,10 @@ private:
 	bool Server_RelayBoost_Validate(ABoostPad* HitBoostPad);
 	void Server_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
-	UFUNCTION(NetMulticast,Reliable,WithValidation)
-	void Multi_RelayBoost(ABoostPad* HitBoostPad);
-	bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
-	void Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad);
+	// UFUNCTION(NetMulticast,Reliable,WithValidation)
+	// void Multi_RelayBoost(ABoostPad* HitBoostPad);
+	// bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
+	// void Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
 protected:
 
@@ -131,6 +133,8 @@ protected:
 
 	/** Fires a projectile. */
 	void OnFire();
+
+	void DetonateBoostPad();
 
 	//Draw Bullet Tracers
 	void DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation,FVector &HitResultLocation, FVector &ShotDirection);
