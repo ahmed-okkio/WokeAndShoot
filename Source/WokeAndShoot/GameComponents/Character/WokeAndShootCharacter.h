@@ -102,9 +102,9 @@ private:
 	void Server_RelayRightAxis_Implementation(float MoveRightAxisParam);
 
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_RelayHitScan(const FVector& ViewPointLocation, const FVector& EndPoint);
-	bool Server_RelayHitScan_Validate(const FVector& ViewPointLocation, const FVector& EndPoint);
-	void Server_RelayHitScan_Implementation(const FVector& ViewPointLocation, const FVector& EndPoint);
+	void Server_RelayHitScan(const FVector& ViewPointLocation, const FVector& EndPoint, const FHitResult& ClientHitResult);
+	bool Server_RelayHitScan_Validate(const FVector& ViewPointLocation, const FVector& EndPoint, const FHitResult& ClientHitResult);
+	void Server_RelayHitScan_Implementation(const FVector& ViewPointLocation, const FVector& EndPoint, const FHitResult& ClientHitResult);
 
 	UFUNCTION(NetMulticast,Reliable,WithValidation)
 	void Multi_RelayDamage(float Damage, AActor* HitActor);

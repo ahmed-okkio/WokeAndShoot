@@ -145,13 +145,14 @@ void AWokeAndShootCharacter::OnFire()
 		Params.AddIgnoredActor(this);
 
 		// Handles HitScan that only runs on the server
-		HitScan(HitResult, Params, ViewPointLocation, EndPoint);
+		// HitScan(HitResult, Params, ViewPointLocation, EndPoint);
 		
 		if (bool bOfflineLineTrace = World->LineTraceSingleByChannel(OUT HitResult,ViewPointLocation, EndPoint, ECollisionChannel::ECC_GameTraceChannel2, Params))
 		{
 			PlayBulletImpactAnimation(HitResult.Location, ShotDirection.Rotation());
 			// DrawBulletTracers(ViewPointLocation,SpawnLocation, HitResult.Location, ShotDirection);
-
+	
+			Server_RelayHitScan(ViewPointLocation,EndPoint,HitResult);
 			if(auto HitBoostPad = Cast<ABoostPad>(HitResult.GetActor()))
 			{
 				if(HitBoostPad->ClientPrimePad(this))
@@ -487,7 +488,7 @@ void AWokeAndShootCharacter::HitScan(FHitResult& HitResult, FCollisionQueryParam
 	else
 	{
 		// Client request hitscan
-		Server_RelayHitScan(StartingLocation, EndLocation);
+		// Server_RelayHitScan(StartingLocation, EndLocation);
 	}
 }
 
@@ -571,33 +572,36 @@ void AWokeAndShootCharacter::Server_RelayRightAxis_Implementation(float MoveRigh
 	Client_MoveRightAxis = MoveRightAxisParam;
 }
 
-bool AWokeAndShootCharacter::Server_RelayHitScan_Validate(const FVector& ViewPointLocation, const FVector& EndPoint) 
+bool AWokeAndShootCharacter::Server_RelayHitScan_Validate(const FVector& ViewPointLocation, const FVector& EndPoint, const FHitResult& ClientHitResult) 
 {
 	return true;
 }
 
-void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(const FVector& ViewPointLocation, const FVector& EndPoint) 
+void AWokeAndShootCharacter::Server_RelayHitScan_Implementation(const FVector& ViewPointLocation, const FVector& EndPoint, const FHitResult& ClientHitResult) 
 {
-	UWorld* World = GetWorld();
-	if(World ==  nullptr)
-	{
-		return;
-	}
+	Multi_RelayDamage(100.f, ClientHitResult.GetActor());
 
-	// Server only linetrace
-	FHitResult ServerHitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	bool bLineTrace = World->LineTraceSingleByChannel(ServerHitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
-	if(bLineTrace && ServerHitResult.GetActor())
-	{
+	// Disabled till server kill verification is made
+	// UWorld* World = GetWorld();
+	// if(World ==  nullptr)
+	// {
+	// 	return;
+	// }
+
+	// // Server only linetrace
+	// FHitResult ServerHitResult;
+	// FCollisionQueryParams Params;
+	// Params.AddIgnoredActor(this);
+	// bool bLineTrace = World->LineTraceSingleByChannel(ServerHitResult, ViewPointLocation, EndPoint,ECollisionChannel::ECC_GameTraceChannel2, Params);
+	// if(bLineTrace && ServerHitResult.GetActor())
+	// {
 		
-		if(auto Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor()))
-		{
-			Multi_RelayDamage(100.f, ServerHitResult.GetActor());
-		}
+	// 	if(auto Character = Cast<AWokeAndShootCharacter>(ServerHitResult.GetActor()))
+	// 	{
+	// 		Multi_RelayDamage(100.f, ServerHitResult.GetActor());
+	// 	}
 		
-	}
+	// }
 }
 
 bool AWokeAndShootCharacter::Multi_RelayDamage_Validate(float Damage, AActor* HitActor) 
