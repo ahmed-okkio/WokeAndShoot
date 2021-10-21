@@ -95,6 +95,9 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	// Bind fire event
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AWokeAndShootCharacter::OnFire);
 
+	// Bind boost pad detonation events
+	PlayerInputComponent->BindAction("DetonateBoostPad", IE_Pressed, this, &AWokeAndShootCharacter::DetonateBoostPad);
+
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AWokeAndShootCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AWokeAndShootCharacter::MoveRight);
@@ -102,6 +105,7 @@ void AWokeAndShootCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	// Bind turn events
 	PlayerInputComponent->BindAxis("Turn", this, &AWokeAndShootCharacter::LookLeftRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AWokeAndShootCharacter::LookUpDown);
+	
 
 	// Setting Sensitivity
 	SetCharacterSensitivity();
@@ -150,12 +154,14 @@ void AWokeAndShootCharacter::OnFire()
 
 			if(auto HitBoostPad = Cast<ABoostPad>(HitResult.GetActor()))
 			{
-				HitBoostPad->BoostPlayers(this);
-
-				// Network
-				if(!HasAuthority())
+				if(HitBoostPad->ClientPrimePad(this))
 				{
-					Server_RelayBoost(HitBoostPad);
+					if(PrimedBoostPad != nullptr)
+					{
+						PrimedBoostPad->ClientResetPad();
+					}
+
+					PrimedBoostPad = HitBoostPad;
 				}
 			}
 		}
@@ -167,6 +173,30 @@ void AWokeAndShootCharacter::OnFire()
 			UE_LOG(LogTemp,Warning, TEXT("Hit: %s"), *HitResult.GetComponent()->GetName());
 		}
 	} 
+}
+
+void AWokeAndShootCharacter::DetonateBoostPad() 
+{
+	if(PrimedBoostPad == nullptr)
+	{
+		// Play sound effect to notify the players no boost pads are primed.
+		return;
+	}
+
+	PrimedBoostPad->DetonatePad(this);
+
+	// Network
+	if(!HasAuthority())
+	{
+		Server_RelayBoost(PrimedBoostPad);
+	}
+	else
+	{
+
+	}
+	
+	// Reseting boost pad slot.
+	PrimedBoostPad = nullptr;
 }
 
 void AWokeAndShootCharacter::GetViewPointRotLoc(OUT FVector &ViewPointLocation, OUT FRotator &ViewPointRotation) const
@@ -182,7 +212,7 @@ void AWokeAndShootCharacter::GetViewPointRotLoc(OUT FVector &ViewPointLocation, 
 // TO DO: Rework, currently inactive
 void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVector &SpawnLocation, FVector &HitResultLocation, FVector &ShotDirection)
 {
-	//Refactor when tracers are complete
+	// Refactor when tracers are complete
 	UParticleSystemComponent* TracerComponent;
 	if(TracerParticle == nullptr){return;}
 	// if (Distance == Range)
@@ -194,7 +224,7 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 		TracerComponent = UGameplayStatics::SpawnEmitterAttached(TracerParticle, ProjectileSceneComp);
 	}
 
-	//Set Spawn Collision Handling Override
+	// Set Spawn Collision Handling Override
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	if (TracerComponent)
@@ -224,7 +254,7 @@ void AWokeAndShootCharacter::DrawBulletTracers(FVector &ViewPointLocation, FVect
 	}
 }
 
-//Movement
+// Movement
 void AWokeAndShootCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
@@ -233,7 +263,7 @@ void AWokeAndShootCharacter::MoveForward(float Value)
 	}
 	else if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling && Client_MoveRightAxis != 0)
 	{
-		//Keep Movement going while air strafing without holding W
+		// Keep Movement going while air strafing without holding W
 		FVector VelocityNoZ = UKismetMathLibrary::LessLess_VectorRotator(GetVelocity(),GetActorRotation());
 		if(VelocityNoZ.X > 600)
 		{	
@@ -247,10 +277,10 @@ void AWokeAndShootCharacter::MoveForward(float Value)
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
 	
-	//Set Local Axis Variable
+	// Set Local Axis Variable
 	Client_MoveForwardAxis = Value;
 
-	//Relay Axis to Server
+	// Relay Axis to Server
 	Server_RelayForwardAxis(Value);
 	
 }
@@ -259,7 +289,7 @@ void AWokeAndShootCharacter::MoveRight(float Value)
 {
 	if (Value != 0.0f)
 	{
-		//Restricts left right speed when in air
+		// Restricts left right speed when in air
 		if(CharacterMovement->MovementMode.GetValue() == MOVE_Falling)
 		{
 			Value *= 0.3;
@@ -268,7 +298,7 @@ void AWokeAndShootCharacter::MoveRight(float Value)
 		AddMovementInput(GetActorRightVector(), Value);
 	}
 
-	//Set Local Axis Variable
+	// Set Local Axis Variable
 	Client_MoveRightAxis = Value;
 
 	// Relay Axis to Server
@@ -287,7 +317,7 @@ void AWokeAndShootCharacter::LookUpDown(float Rate)
 {
 	APawn::AddControllerPitchInput(Sensitivity * Rate);
 
-	//Network
+	// Network
 	if(HasAuthority())
 	{
 		Multi_RelayPitch(GetViewRotation().Pitch);
@@ -592,19 +622,19 @@ bool AWokeAndShootCharacter::Server_RelayBoost_Validate(ABoostPad* HitBoostPad)
 
 void AWokeAndShootCharacter::Server_RelayBoost_Implementation(ABoostPad* HitBoostPad)
 {
-	HitBoostPad->BoostPlayers(this);
-	Multi_RelayBoost(HitBoostPad);
+	HitBoostPad->DetonatePad(this);
+	// Multi_RelayBoost(HitBoostPad);
 }
 
-bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
-{
-	return true;
-}
+// bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
+// {
+// 	return true;
+// }
 
-void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad) 
-{
-	if(!IsLocallyControlled())
-	{
-		HitBoostPad->BoostPlayers(this);
-	}
-}
+// void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad) 
+// {
+// 	if(!IsLocallyControlled())
+// 	{
+// 		// HitBoostPad->DetonatePad(this);
+// 	}
+// }

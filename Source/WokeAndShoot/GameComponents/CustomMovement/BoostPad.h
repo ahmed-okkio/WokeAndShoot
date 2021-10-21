@@ -17,12 +17,23 @@ class WOKEANDSHOOT_API ABoostPad : public AActor
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* PadMesh;
+
 	UPROPERTY(VisibleDefaultsOnly, Category=Pad)
 	USphereComponent* CollisionComp;
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* DefaultMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* PrimedMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* DetonatedMaterial;
 
 	TArray<AWokeAndShootCharacter*> CooldownList;
 
-	TArray<FTimerHandle> TimerHandles;
+	// TArray<FTimerHandle> TimerHandles;
+
+	FTimerHandle TH_PadTimeOutTimer;
 
 	FTimerDelegate PopDelegate;
 
@@ -36,7 +47,8 @@ private:
 
 	FVector GetImpulseDirection(FVector& ActorLocation);
 
-	void ApplyBoost(AWokeAndShootCharacter* Initiator);
+	
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,5 +64,10 @@ public:
 public:	
 	ABoostPad();
 
-	void BoostPlayers(AWokeAndShootCharacter* Initiator);
+	void DetonatePad(AWokeAndShootCharacter* Initiator);
+
+	// Attempts to prime this pad if the initiator is not on cooldown and returns true if successfully primed. otherwise false.
+	bool ClientPrimePad(AWokeAndShootCharacter* Initiator);
+
+	void ClientResetPad();
 };
