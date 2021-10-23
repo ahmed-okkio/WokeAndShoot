@@ -159,6 +159,8 @@ protected:
 	 */
 	void LookLeftRight(float Rate);
 
+	bool CanShoot();
+
 public:
 
 	UPROPERTY(EditAnywhere, Category=Camera)
