@@ -49,11 +49,12 @@ void ABoostPad::RemoveActorCD()
 		CooldownList.Pop();
 	}
 
-	PadMesh->SetMaterial(0,DefaultMaterial);
+	ClientResetPad();
 }
 
 void ABoostPad::ClientResetPad() 
 {
+	bIsPrimed = false;
 	PadMesh->SetMaterial(0,DefaultMaterial);
 }
 
@@ -87,8 +88,9 @@ FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation)
 
 bool ABoostPad::ClientPrimePad(AWokeAndShootCharacter* Initiator) 
 {
-	if(!CooldownList.Contains(Initiator))
+	if(!CooldownList.Contains(Initiator) && !bIsPrimed)
 	{	
+		bIsPrimed = true;
 		PadMesh->SetMaterial(0,PrimedMaterial);
 		GetWorld()->GetTimerManager().SetTimer(TH_PadTimeOutTimer,this,&ABoostPad::ClientResetPad,BoostPadCooldown);
 		return true;	
@@ -99,7 +101,8 @@ bool ABoostPad::ClientPrimePad(AWokeAndShootCharacter* Initiator)
 
 void ABoostPad::DetonatePad(AWokeAndShootCharacter* Initiator) 
 {
-	if(CooldownList.Contains(Initiator)){return;}
+	if(CooldownList.Contains(Initiator) || !bIsPrimed){return;}
+
 	// Add Cooldown
 	InitiateCooldown(Initiator);
 
@@ -136,17 +139,22 @@ void ABoostPad::DetonatePad(AWokeAndShootCharacter* Initiator)
 					continue;
 				}
 
-				// Prime Pad
 				// Apply Impulse
 				HitActor->DirectionalImpulse(ImpulseDirection);
 
-				// Debug Line for Forward Facing Line
-				// DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
+				if(Debug_DetonatePad)
+				{
+					// Debug Line for Forward Facing Line
+					DrawDebugLine(GetWorld(),SweepStart ,(SweepStart + GetActorRotation().RotateVector(FVector(0,100,0))), FColor::Red, true);
+				}
 			}
 		}
 	}
-	// DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
-	// GLog->Log("Fired");
+	if(Debug_DetonatePad)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
+		GLog->Log("Boost Activated");
+	}
 }
 
 
