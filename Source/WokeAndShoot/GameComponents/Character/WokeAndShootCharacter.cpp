@@ -126,6 +126,9 @@ void AWokeAndShootCharacter::Restart()
 
 void AWokeAndShootCharacter::OnFire()
 {
+
+	if(!CanShoot()) {return;}
+	
 	PlayShotSound();
 	// PlayMuzzleFlashAnimation();
 	ToggleShotAnim = true;
@@ -336,6 +339,14 @@ void AWokeAndShootCharacter::LookUpDown(float Rate)
 void AWokeAndShootCharacter::LookLeftRight(float Rate)
 {
 	APawn::AddControllerYawInput(Sensitivity * Rate);
+}
+
+bool AWokeAndShootCharacter::CanShoot()
+{
+	bool canShoot = true;
+	if (IsDead()) {canShoot = false;}
+
+	return  canShoot;
 }
 
 void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection) 
