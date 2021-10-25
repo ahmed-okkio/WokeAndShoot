@@ -33,6 +33,10 @@ private:
 	UCameraComponent* FirstPersonCameraComponent;
 
 	UPROPERTY(EditAnywhere, Category = Animations)
+	UParticleSystem* MuzzleFlash;
+
+
+	UPROPERTY(EditAnywhere, Category = Animations)
 	UParticleSystem* BulletImpact;
 
 	//Shooting Range
@@ -68,6 +72,7 @@ private:
 	void PlayShotSound();
 	void PlayShotAnimation(float DeltaTime);
 	void PlayBulletImpactAnimation(FVector HitLocation, FRotator ImpactRotation);
+	void PlayMuzzleFlashAnimation();
 	void HitScan(FHitResult& HitResult, FCollisionQueryParams& Params, FVector& StartingLocation, FVector&  EndLocation);
 
 	// Network
