@@ -37,6 +37,8 @@ private:
 
 	FTimerDelegate PopDelegate;
 
+	bool bIsPrimed = false;
+
 private:
 
 	void RemoveActorCD();
@@ -70,4 +72,11 @@ public:
 	bool ClientPrimePad(AWokeAndShootCharacter* Initiator);
 
 	void ClientResetPad();
+
+
+public:
+///////////////////////////////////////////////////////////////////////////////////////
+// Debug toggles
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug Mode")
+	bool Debug_DetonatePad = false;
 };
