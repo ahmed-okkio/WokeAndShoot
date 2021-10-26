@@ -78,6 +78,10 @@
 		{
 			"Name": "ActorLayerUtilities",
 			"Enabled": false
+		},
+		{
+			"Name": "RawInput",
+			"Enabled": true
 		}
 	]
 }

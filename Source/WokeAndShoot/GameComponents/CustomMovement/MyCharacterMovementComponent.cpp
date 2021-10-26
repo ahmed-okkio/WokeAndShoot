@@ -13,7 +13,19 @@
 void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iterations) 
 {
     Super::PhysFalling(deltaTime, Iterations);
+	// GravityScale = 1.8f * (0.9 + ((1200 - Velocity.Size2D())/12000));
+	// UE_LOG(LogTemp,Warning,TEXT("Gravity: %f"),GravityScale);	
+	// UE_LOG(LogTemp,Warning,TEXT("Vel: %f"),((1200 - Velocity.Size2D())/12000));	
 
+	if(Velocity.Size2D() < 500.f && GravityScale < 1.8f)
+	{
+		// velocity = 100% : gravity scale = 0.9%
+		// velocity = 80% : gravity = 0.92%
+		// Gravity = 1.8 (100%) Velocity = 500(50%);
+		// 
+		// * (Velocity.Size2D()/1200.f - 1.f);
+	}
+	if(Velocity.Size() < 1000.f){return;}
 	// Air Strafe Implementation
 	AWokeAndShootCharacter* MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner());
 	if(MyCharacter == nullptr)
@@ -48,12 +60,13 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 		AimAtAngle *= PositiveOrNegative;
 
 		// Applying Strafe Sharpness Modifier
-		AimAtAngle *= StrafeSharpness;
+		AimAtAngle *= StrafeSharpness*WishDir.Size2D();;
 
 		if(AimAtAngle)
 		{
 			bIgnoreClientMovementErrorChecksAndCorrection = true;
-			Velocity = NewVelocity.RotateAngleAxis(AimAtAngle*abs(MoveRightAxis),FVector (0,0,1));
+			Velocity = NewVelocity.RotateAngleAxis(AimAtAngle,FVector (0,0,1));
+			// Velocity = NewVelocity;
 		}
 
 		// Debug mode
