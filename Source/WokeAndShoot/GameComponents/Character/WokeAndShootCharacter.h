@@ -159,7 +159,7 @@ protected:
 	 */
 	void LookLeftRight(float Rate);
 
-	bool CanShoot();
+	bool CanShoot() const;
 
 public:
 

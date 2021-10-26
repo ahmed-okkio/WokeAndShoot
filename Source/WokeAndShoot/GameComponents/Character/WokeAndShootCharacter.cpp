@@ -337,7 +337,7 @@ void AWokeAndShootCharacter::LookLeftRight(float Rate)
 	APawn::AddControllerYawInput(Sensitivity * Rate);
 }
 
-bool AWokeAndShootCharacter::CanShoot()
+bool AWokeAndShootCharacter::CanShoot() const
 {
 	bool canShoot = true;
 	if (IsDead()) {canShoot = false;}
