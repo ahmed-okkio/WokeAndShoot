@@ -61,6 +61,8 @@ void AWokeAndShootCharacter::BeginPlay()
     }
 	
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), CharacterMovement->GravityScale));
+	
+	
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -173,6 +175,13 @@ void AWokeAndShootCharacter::OnFire()
 			}
 		}
 
+		bCanShoot = false;
+		GetWorldTimerManager().SetTimer(ShootingTimerHandle, FTimerDelegate::CreateLambda([this]
+		{
+        		this->bCanShoot = true;
+        		GetWorldTimerManager().ClearTimer(this->ShootingTimerHandle);
+		}), ShootingCooldown, false, -2);
+		
 		// Debug mode
 		if(Debug_OnFire)	
 		{
@@ -344,7 +353,9 @@ void AWokeAndShootCharacter::LookLeftRight(float Rate)
 bool AWokeAndShootCharacter::CanShoot() const
 {
 	bool canShoot = true;
+	
 	if (IsDead()) {canShoot = false;}
+	if (!bCanShoot) {canShoot = false;}
 
 	return  canShoot;
 }

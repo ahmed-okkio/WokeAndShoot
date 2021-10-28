@@ -46,6 +46,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	float StrafeMultiplier = 2.f;
 
+	
+	
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	FVector FullScale = FVector(1,1,1);
 
@@ -166,11 +168,18 @@ protected:
 
 	bool CanShoot() const;
 
+protected:
+	
+	bool bIsDead = false;
+	bool bCanShoot = true;
+	
 public:
 
 	UPROPERTY(EditAnywhere, Category=Camera)
 	float Sensitivity = 0.5;
-
+	
+	UPROPERTY(EditAnywhere, Category = Gameplay)
+	float ShootingCooldown = 100.f;
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
@@ -209,9 +218,8 @@ public:
 
 	bool bBoosting = false;
 
+	FTimerHandle ShootingTimerHandle;
 	// FString Killer = TEXT("");
-
-	bool bIsDead = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
 	FName KilledBy = "Unknown";
