@@ -14,7 +14,8 @@
 		"files.associations": {
 			"cmath": "cpp",
 			"complex": "cpp",
-			"valarray": "cpp"
+			"valarray": "cpp",
+			"cstdlib": "cpp"
 		}
 	},
 	"extensions": {

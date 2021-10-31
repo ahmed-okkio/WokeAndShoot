@@ -43,7 +43,11 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 		FVector InputAxis = FVector(MoveForwardAxis,MoveRightAxis,0);
 		FVector WishDir = InputAxis.RotateAngleAxis(MyCharacter->GetViewRotation().Yaw,FVector (0,0,1));
 		
-		if(MaxWalkSpeed < 2400.f)
+		if(MaxWalkSpeed < 1600.f)
+		{
+			MaxWalkSpeed += 10.f ;
+		}
+		else if (MaxWalkSpeed < 2400.f)
 		{
 			MaxWalkSpeed += 3.f ;
 		}
