@@ -18,6 +18,8 @@ public:
 	float Cfg_PlayerSensitivity;
 	UPROPERTY(Config)
 	FString Cfg_LastServerIP;
+	UPROPERTY(Config)
+	int Cfg_FPSLimit;
 public:	
 	AGameConfig();
 };

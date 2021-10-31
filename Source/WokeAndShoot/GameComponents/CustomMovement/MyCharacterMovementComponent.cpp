@@ -13,19 +13,13 @@
 void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iterations) 
 {
     Super::PhysFalling(deltaTime, Iterations);
-	// GravityScale = 1.8f * (0.9 + ((1200 - Velocity.Size2D())/12000));
-	// UE_LOG(LogTemp,Warning,TEXT("Gravity: %f"),GravityScale);	
-	// UE_LOG(LogTemp,Warning,TEXT("Vel: %f"),((1200 - Velocity.Size2D())/12000));	
-
-	if(Velocity.Size2D() < 500.f && GravityScale < 1.8f)
+	if(TH_AirStrafeReset.IsValid())
 	{
-		// velocity = 100% : gravity scale = 0.9%
-		// velocity = 80% : gravity = 0.92%
-		// Gravity = 1.8 (100%) Velocity = 500(50%);
-		// 
-		// * (Velocity.Size2D()/1200.f - 1.f);
+		GetWorld()->GetTimerManager().ClearTimer(TH_AirStrafeReset);
 	}
+
 	if(Velocity.Size() < 1000.f){return;}
+
 	// Air Strafe Implementation
 	AWokeAndShootCharacter* MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner());
 	if(MyCharacter == nullptr)
@@ -33,17 +27,26 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 		return;
 	}
 
+	if(Velocity.Size2D() < 1200.f)
+	{
+		MaxWalkSpeed = 1200.f;
+	}
+	
 	// Player Keyboard Inputs
 	float MoveRightAxis = MyCharacter->Client_MoveRightAxis;
 	float MoveForwardAxis = MyCharacter->Client_MoveForwardAxis;
 	
-	if(MoveRightAxis != 0)
+	if(MoveRightAxis)
 	{
 		FVector NormalVelocity = Velocity.GetSafeNormal2D();
 		FVector ForwardVector = MyCharacter->GetActorForwardVector();
 		FVector InputAxis = FVector(MoveForwardAxis,MoveRightAxis,0);
 		FVector WishDir = InputAxis.RotateAngleAxis(MyCharacter->GetViewRotation().Yaw,FVector (0,0,1));
-
+		
+		if(MaxWalkSpeed < 2400.f)
+		{
+			MaxWalkSpeed += 3.f ;
+		}
 		float CurrentSpeed = FVector::DotProduct(Velocity,WishDir);
 		float MaxAccelDeltaTime = MaxAcceleration * deltaTime;
 		float AddSpeed = MaxWalkSpeed - CurrentSpeed;
@@ -55,18 +58,28 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 
 		FVector NewVelocity = Velocity  + (WishDir * AddSpeed * StrafeMultiplier);
 
-		float AimAtAngle = FMath::RadiansToDegrees(FVector::DotProduct(NormalVelocity, ForwardVector));
+		float AimAtAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(NormalVelocity, ForwardVector)));
 		float PositiveOrNegative = FVector::DotProduct(FVector::CrossProduct(NormalVelocity, ForwardVector),FVector(0,0,1));
+
 		AimAtAngle *= PositiveOrNegative;
 
-		// Applying Strafe Sharpness Modifier
-		AimAtAngle *= StrafeSharpness*WishDir.Size2D();;
 
-		if(AimAtAngle)
+		if(AimAtAngle < 90 && (MoveRightAxis*AimAtAngle > 0	))
 		{
 			bIgnoreClientMovementErrorChecksAndCorrection = true;
-			Velocity = NewVelocity.RotateAngleAxis(AimAtAngle,FVector (0,0,1));
+
+			// 10.f and 30 are magic numbers and control the feel of the airstrafe, change them if future tuning is needed.
+			float ModifiedAimAtAngle = (AimAtAngle - ((FMath::Clamp(WishDir.Size2D() * StrafeMultiplier, 0.f, 1.f))) * PositiveOrNegative);
+			float AmountToRotate = FMath::FInterpTo(ModifiedAimAtAngle, AimAtAngle, deltaTime, 10);
+			
+			Velocity = NewVelocity.RotateAngleAxis(AmountToRotate, FVector (0,0,1));
 			// Velocity = NewVelocity;
+
+			const FVector Adjusted = Velocity * deltaTime * 0.;
+			FHitResult Hit(1.f);
+			FRotator NoPitchRotation = MyCharacter->GetViewRotation();
+			NoPitchRotation.Pitch = 0;
+			SafeMoveUpdatedComponent(Adjusted.GetSafeNormal(), NoPitchRotation, true, Hit);
 		}
 
 		// Debug mode
@@ -75,15 +88,25 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 			UE_LOG(LogTemp,Warning,TEXT("________AIRSTRAFE LOG________"));
 			UE_LOG(LogTemp,Warning,TEXT("VELOCITY: %s"),*Velocity.ToString());
 			UE_LOG(LogTemp,Warning,TEXT("WISHDIR: %s"),*WishDir.ToString());
-			UE_LOG(LogTemp,Warning,TEXT("SPEED: %f"),Velocity.Size2D());	
-			UE_LOG(LogTemp,Warning,TEXT("________AIRSTRAFE LOG________"));
+			UE_LOG(LogTemp,Warning,TEXT("SPEED: %f"),Velocity.Size2D());
+			UE_LOG(LogTemp,Warning,TEXT("AimAtAngle: %f"),AimAtAngle);
+			UE_LOG(LogTemp,Warning,TEXT("MoveRightAxis: %f"),MoveRightAxis);		
 		}
 	}
 
-	const FVector Adjusted = Velocity * deltaTime * 0.5;
-	FHitResult Hit(1.f);
-	FRotator NoPitchRotation = MyCharacter->GetViewRotation();
-	NoPitchRotation.Pitch = 0;
-	SafeMoveUpdatedComponent(Adjusted, NoPitchRotation, true, Hit);
+	
+}
 
+void UMyCharacterMovementComponent::PhysWalking(float deltaTime, int32 Iterations) 
+{
+	Super::PhysWalking(deltaTime, Iterations);
+	if(MaxWalkSpeed>1200.f && !TH_AirStrafeReset.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(TH_AirStrafeReset,this,&UMyCharacterMovementComponent::ResetAirMaxSpeed,AirStrafeGracePeriod);	
+	}
+}
+
+void UMyCharacterMovementComponent::ResetAirMaxSpeed() 
+{
+	MaxWalkSpeed = 1200.f;
 }

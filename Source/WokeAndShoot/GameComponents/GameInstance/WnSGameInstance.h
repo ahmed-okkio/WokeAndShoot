@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "RHI.h" 
 #include "WnSGameInstance.generated.h"
 
 class AGameConfig;
@@ -16,6 +17,7 @@ class WOKEANDSHOOT_API UWnSGameInstance : public UGameInstance
 	{
 		FString PlayerName;
 		float PlayerSensitivity;
+		int FPSLimit;
 	};
 	
 private:
@@ -44,7 +46,11 @@ public:
 	FString GetSavedIP() const;
 	UFUNCTION(BlueprintCallable, Category="Main Menu")
 	void SetSavedIP(const FString& NewServerIP);
-
+	UFUNCTION(BlueprintCallable, Category="Main Menu")
+	void SetFPSLimit(const int& NewFPSLimit);
+	UFUNCTION(BlueprintPure, Category="Player Information")
+	int GetFPSLimit() const;	
+	
 	UFUNCTION(BlueprintCallable, Category="Player Information")
 	void LoadPlayerData();
 	UFUNCTION(BlueprintCallable, Category="Player Information")

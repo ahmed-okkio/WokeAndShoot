@@ -6,11 +6,16 @@
 		},
 		{
 			"name": "UE4",
-			"path": "S:\\Unreal_Engine_Versions\\UE_4.27"
+			"path": "S:\\Unreal_Engine_Versions\\UE_4.26"
 		}
 	],
 	"settings": {
-		"typescript.tsc.autoDetect": "off"
+		"typescript.tsc.autoDetect": "off",
+		"files.associations": {
+			"cmath": "cpp",
+			"complex": "cpp",
+			"valarray": "cpp"
+		}
 	},
 	"extensions": {
 		"recommendations": [
