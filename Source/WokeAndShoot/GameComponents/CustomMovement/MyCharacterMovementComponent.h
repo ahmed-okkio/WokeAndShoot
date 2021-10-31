@@ -21,13 +21,21 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
 	//How sharp your velocity conforms to your forward vector
 	float StrafeSharpness = 0.01;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "My Character Movement|Air Strafing", Meta = (AllowPrivateAccess = "true"))
+	// How much time is allowed until air max speed is reset back to normal
+	float AirStrafeGracePeriod = 0.5f;
+
+	FTimerHandle TH_AirStrafeReset;
+
+private:
+	void ResetAirMaxSpeed();
 
 #pragma endregion
 
 #pragma region Overrides
 public:
 	virtual void PhysFalling(float deltaTime, int32 Iterations) override;
+	virtual void PhysWalking(float deltaTime, int32 Iterations);
 
 #pragma endregion
 public:

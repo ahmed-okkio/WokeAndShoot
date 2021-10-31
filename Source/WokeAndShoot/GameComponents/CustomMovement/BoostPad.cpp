@@ -88,8 +88,11 @@ FVector ABoostPad::GetImpulseDirection(FVector& ActorLocation)
 
 bool ABoostPad::ClientPrimePad(AWokeAndShootCharacter* Initiator) 
 {
+	if(CooldownList.Contains(Initiator)){GLog->Log("#383 On Cooldown");}
+	if(bIsPrimed){GLog->Log("#383 IsPrimed");}
 	if(!CooldownList.Contains(Initiator) && !bIsPrimed)
 	{	
+		GLog->Log("#383 Past Cooldown prime check");
 		bIsPrimed = true;
 		PadMesh->SetMaterial(0,PrimedMaterial);
 		GetWorld()->GetTimerManager().SetTimer(TH_PadTimeOutTimer,this,&ABoostPad::ClientResetPad,BoostPadCooldown);
