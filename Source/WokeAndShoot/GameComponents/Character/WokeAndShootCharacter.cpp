@@ -61,8 +61,6 @@ void AWokeAndShootCharacter::BeginPlay()
     }
 	
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), CharacterMovement->GravityScale));
-	
-	
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -81,8 +79,6 @@ void AWokeAndShootCharacter::Tick(float DeltaTime)
 	{
 		// PlayShotAnimation(DeltaTime);
 	}
-
-	//  GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), GetVelocity().Size2D()));
 }
 
 // Input
@@ -165,7 +161,7 @@ void AWokeAndShootCharacter::OnFire()
 			{
 				if(HitBoostPad->ClientPrimePad(this))
 				{
-					if(PrimedBoostPad != nullptr)
+					if(PrimedBoostPad != nullptr && PrimedBoostPad != HitBoostPad)
 					{
 						PrimedBoostPad->ClientResetPad();
 					}
@@ -364,13 +360,13 @@ void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection)
 {
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
 	CharacterMovement->Launch(ImpulseDirection);
-	CharacterMovement->GravityScale *= 0.9;
+	// CharacterMovement->GravityScale *= 0.9;
 }
 
 void AWokeAndShootCharacter::Landed(const FHitResult & Hit) 
 {
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
-	CharacterMovement->GravityScale = 1.8f;
+	// CharacterMovement->GravityScale = 1.8f;
 }
 
 bool AWokeAndShootCharacter::IsDead() const
