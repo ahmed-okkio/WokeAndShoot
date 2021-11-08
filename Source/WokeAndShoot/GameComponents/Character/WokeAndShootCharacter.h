@@ -123,6 +123,17 @@ private:
 	bool Server_RelayBoost_Validate(ABoostPad* HitBoostPad);
 	void Server_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayShotSound();
+	bool Server_RelayShotSound_Validate();
+	void Server_RelayShotSound_Implementation();
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_RelayShotSound();
+	bool Multi_RelayShotSound_Validate();
+	void Multi_RelayShotSound_Implementation();
+
+
 	// UFUNCTION(NetMulticast,Reliable,WithValidation)
 	// void Multi_RelayBoost(ABoostPad* HitBoostPad);
 	// bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);

@@ -660,6 +660,26 @@ void AWokeAndShootCharacter::Server_RelayBoost_Implementation(ABoostPad* HitBoos
 	// Multi_RelayBoost(HitBoostPad);
 }
 
+bool AWokeAndShootCharacter::Server_RelayShotSound_Validate() 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayShotSound_Implementation() 
+{
+	Multi_
+}
+
+bool AWokeAndShootCharacter::Multi_RelayShotSound_Validate() 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Multi_RelayShotSound_Implementation() 
+{
+	PlayShotSound();
+}
+
 // bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
 // {
 // 	return true;
