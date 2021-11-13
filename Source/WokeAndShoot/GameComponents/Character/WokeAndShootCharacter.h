@@ -131,6 +131,7 @@ protected:
 	virtual void BeginPlay();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	
 	virtual void Restart() override;
 
 	//Get ViewPoint Rotation and Location
@@ -216,6 +217,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
 	FName KilledBy = "Unknown";
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
+	float BaseFOV = 100.f;
+
 
 public:
 
@@ -241,6 +245,8 @@ public:
 	bool IsDead() const;
 
 	void SetCharacterSensitivity();
+
+	void AddFOV(float AdditionalFOV);
 
 	void PawnHandleDeath();
 
