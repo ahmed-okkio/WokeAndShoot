@@ -123,6 +123,17 @@ private:
 	bool Server_RelayBoost_Validate(ABoostPad* HitBoostPad);
 	void Server_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayShotSound();
+	bool Server_RelayShotSound_Validate();
+	void Server_RelayShotSound_Implementation();
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_RelayShotSound();
+	bool Multi_RelayShotSound_Validate();
+	void Multi_RelayShotSound_Implementation();
+
+
 	// UFUNCTION(NetMulticast,Reliable,WithValidation)
 	// void Multi_RelayBoost(ABoostPad* HitBoostPad);
 	// bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
@@ -200,13 +211,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
 	TSubclassOf<class AWokeAndShootProjectile> ProjectileClass;
 
-	/** Sound to play each time we fire */
+	/** Sound to play each time we fire for FP*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
+	USoundBase* FireSoundFP;
+	/** Sound to play each time we fire for TP */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSoundTP;
 
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
 
 	float Client_MoveRightAxis;
 	float Client_MoveForwardAxis;
