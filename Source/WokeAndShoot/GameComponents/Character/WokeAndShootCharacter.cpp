@@ -62,6 +62,8 @@ void AWokeAndShootCharacter::BeginPlay()
     {
         Gamemode->PlayersAlive++;
     }
+	
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), CharacterMovement->GravityScale));
 }
 
 void AWokeAndShootCharacter::Tick(float DeltaTime) 
@@ -129,7 +131,19 @@ void AWokeAndShootCharacter::OnFire()
 
 	if(!CanShoot()) {return;}
 	
+	
+	// Network ShotSFX
 	PlayShotSound();
+
+	if(!HasAuthority())
+	{
+		Server_RelayShotSound();
+	}
+	else
+	{
+		Multi_RelayShotSound();
+	}
+
 	// PlayMuzzleFlashAnimation();
 	ToggleShotAnim = true;
 
@@ -173,6 +187,13 @@ void AWokeAndShootCharacter::OnFire()
 			}
 		}
 
+		bCanShoot = false;
+		GetWorldTimerManager().SetTimer(ShootingTimerHandle, FTimerDelegate::CreateLambda([this]
+		{
+        		this->bCanShoot = true;
+        		GetWorldTimerManager().ClearTimer(this->ShootingTimerHandle);
+		}), ShootingCooldown, false, -2);
+		
 		// Debug mode
 		if(Debug_OnFire)	
 		{
@@ -344,7 +365,9 @@ void AWokeAndShootCharacter::LookLeftRight(float Rate)
 bool AWokeAndShootCharacter::CanShoot() const
 {
 	bool canShoot = true;
+	
 	if (IsDead()) {canShoot = false;}
+	if (!bCanShoot) {canShoot = false;}
 
 	return  canShoot;
 }
@@ -436,10 +459,22 @@ void AWokeAndShootCharacter::SetMuzzleLocation()
 // Character actions 
 void AWokeAndShootCharacter::PlayShotSound() 
 {
-	// Try and play a firing sound if specified
-	if (FireSound != nullptr)
+	if(IsLocallyControlled())
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		// Try and play a firing sound if specified
+		if (FireSoundFP != nullptr)
+		{
+			// UGameplayStatics::PlaySoundAtLocation(this, FireSound, FP_MuzzleLocation->GetComponentLocation());
+			UGameplayStatics::SpawnSoundAttached(FireSoundFP,FP_MuzzleLocation,TEXT("Muzzle"));
+		}
+	}
+	else
+	{
+		if (FireSoundTP != nullptr)
+		{
+			// UGameplayStatics::PlaySoundAtLocation(this, FireSound, FP_MuzzleLocation->GetComponentLocation());
+			UGameplayStatics::SpawnSoundAttached(FireSoundTP,FP_MuzzleLocation,TEXT("Muzzle"));
+		}
 	}
 }
 
@@ -656,6 +691,32 @@ void AWokeAndShootCharacter::Server_RelayBoost_Implementation(ABoostPad* HitBoos
 {
 	HitBoostPad->DetonatePad(this);
 	// Multi_RelayBoost(HitBoostPad);
+}
+
+bool AWokeAndShootCharacter::Server_RelayShotSound_Validate() 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Server_RelayShotSound_Implementation() 
+{
+	// Run on server.
+	PlayShotSound();
+	// Replicate to clients.
+	Multi_RelayShotSound();
+}
+
+bool AWokeAndShootCharacter::Multi_RelayShotSound_Validate() 
+{
+	return true;
+}
+
+void AWokeAndShootCharacter::Multi_RelayShotSound_Implementation() 
+{
+	if(!IsLocallyControlled())
+	{
+		PlayShotSound();
+	}
 }
 
 // bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 

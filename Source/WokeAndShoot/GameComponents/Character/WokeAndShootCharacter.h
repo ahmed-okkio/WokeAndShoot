@@ -46,6 +46,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	float StrafeMultiplier = 2.f;
 
+	
+	
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	FVector FullScale = FVector(1,1,1);
 
@@ -121,6 +123,17 @@ private:
 	bool Server_RelayBoost_Validate(ABoostPad* HitBoostPad);
 	void Server_RelayBoost_Implementation(ABoostPad* HitBoostPad);
 
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_RelayShotSound();
+	bool Server_RelayShotSound_Validate();
+	void Server_RelayShotSound_Implementation();
+
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_RelayShotSound();
+	bool Multi_RelayShotSound_Validate();
+	void Multi_RelayShotSound_Implementation();
+
+
 	// UFUNCTION(NetMulticast,Reliable,WithValidation)
 	// void Multi_RelayBoost(ABoostPad* HitBoostPad);
 	// bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
@@ -167,11 +180,18 @@ protected:
 
 	bool CanShoot() const;
 
+protected:
+	
+	bool bIsDead = false;
+	bool bCanShoot = true;
+	
 public:
 
 	UPROPERTY(EditAnywhere, Category=Camera)
 	float Sensitivity = 0.5;
-
+	
+	UPROPERTY(EditAnywhere, Category = Gameplay)
+	float ShootingCooldown = 100.f;
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
@@ -192,13 +212,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
 	TSubclassOf<class AWokeAndShootProjectile> ProjectileClass;
 
-	/** Sound to play each time we fire */
+	/** Sound to play each time we fire for FP*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
+	USoundBase* FireSoundFP;
+	/** Sound to play each time we fire for TP */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSoundTP;
 
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
 
 	float Client_MoveRightAxis;
 	float Client_MoveForwardAxis;
@@ -210,9 +234,8 @@ public:
 
 	bool bBoosting = false;
 
+	FTimerHandle ShootingTimerHandle;
 	// FString Killer = TEXT("");
-
-	bool bIsDead = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Respawn)
 	FName KilledBy = "Unknown";
