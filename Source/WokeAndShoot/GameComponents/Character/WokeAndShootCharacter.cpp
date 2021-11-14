@@ -25,8 +25,11 @@ DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 //////////////////////////////////////////////////////////////////////////
 // AWokeAndShootCharacter
 AWokeAndShootCharacter::AWokeAndShootCharacter(const class FObjectInitializer& ObjectInitializer) :
-	Super(ObjectInitializer.SetDefaultSubobjectClass<UMyCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UMyCharacterMovementComponent>(
+		ACharacter::CharacterMovementComponentName).DoNotCreateDefaultSubobject
+             (ACharacter::MeshComponentName))
 {
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
@@ -68,9 +71,10 @@ void AWokeAndShootCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if(ToggleSpawnAnim)
 	{
-		FirstPersonCameraComponent->FieldOfView = FMath::Lerp(FirstPersonCameraComponent->FieldOfView,100.f,0.1);
-		if(FirstPersonCameraComponent->FieldOfView == 100.f)
+		FirstPersonCameraComponent->FieldOfView = FMath::Lerp(FirstPersonCameraComponent->FieldOfView,BaseFOV,0.1);
+		if(FirstPersonCameraComponent->FieldOfView < BaseFOV+1.f)
 		{
+			
 			ToggleSpawnAnim = false;
 		}
 	}
@@ -378,7 +382,6 @@ void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection)
 void AWokeAndShootCharacter::Landed(const FHitResult & Hit) 
 {
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
-	// CharacterMovement->GravityScale = 1.8f;
 }
 
 bool AWokeAndShootCharacter::IsDead() const
@@ -398,6 +401,11 @@ void AWokeAndShootCharacter::SetCharacterSensitivity()
 	}
 }
 
+void AWokeAndShootCharacter::AddFOV(float AdditionalFOV) 
+{
+	FirstPersonCameraComponent->FieldOfView += AdditionalFOV;
+}
+
 void AWokeAndShootCharacter::PawnHandleDeath() 
 {
 	CharacterMovement->DisableMovement();
@@ -410,6 +418,7 @@ void AWokeAndShootCharacter::CreateCameraComp()
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->FieldOfView = 90.f;
 }
 
 void AWokeAndShootCharacter::CreateMeshComps() 

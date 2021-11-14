@@ -7,12 +7,14 @@
 #include "GameFramework/InputSettings.h"
 #include "../Character/WokeAndShootCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
 
 
 // PhysFalling Override
 void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iterations) 
 {
     Super::PhysFalling(deltaTime, Iterations);
+	
 	if(TH_AirStrafeReset.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TH_AirStrafeReset);
@@ -38,15 +40,22 @@ void UMyCharacterMovementComponent::PhysFalling(float deltaTime, int32 Iteration
 	
 	if(MoveRightAxis)
 	{
+		BrakingFrictionFactor = 0.f;
+
 		FVector NormalVelocity = Velocity.GetSafeNormal2D();
 		FVector ForwardVector = MyCharacter->GetActorForwardVector();
 		FVector InputAxis = FVector(MoveForwardAxis,MoveRightAxis,0);
 		FVector WishDir = InputAxis.RotateAngleAxis(MyCharacter->GetViewRotation().Yaw,FVector (0,0,1));
 		
-		if(MaxWalkSpeed < 2400.f)
+		if(MaxWalkSpeed < 1600.f)
+		{
+			MaxWalkSpeed += 10.f ;
+		}
+		else if (MaxWalkSpeed < MaxAirSpeed)
 		{
 			MaxWalkSpeed += 3.f ;
 		}
+
 		float CurrentSpeed = FVector::DotProduct(Velocity,WishDir);
 		float MaxAccelDeltaTime = MaxAcceleration * deltaTime;
 		float AddSpeed = MaxWalkSpeed - CurrentSpeed;
@@ -109,4 +118,51 @@ void UMyCharacterMovementComponent::PhysWalking(float deltaTime, int32 Iteration
 void UMyCharacterMovementComponent::ResetAirMaxSpeed() 
 {
 	MaxWalkSpeed = 1200.f;
+	BrakingFrictionFactor = 2.f;
+}
+
+void UMyCharacterMovementComponent::DynamicFOV() 
+{
+	float Speed = Velocity.Size2D();
+
+	if(Speed > 1300.f && DynamicFOVSwitch)
+	{	
+		if(auto MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner()))
+		{
+			UCameraComponent* FPC = MyCharacter->GetFirstPersonCameraComponent();
+			float BaseFOV = MyCharacter->BaseFOV;
+			// float AddFOV = (DynamicFOVAmount / (MaxAirSpeed - 1300.f)) * (Speed - 1300.f);
+			float AddFOV = BaseFOV + (DynamicFOVAmount / (MaxAirSpeed - 1300.f)) * (Speed - 1300.f);
+			FPC->FieldOfView = AddFOV;
+			
+			if(FPC->FieldOfView > BaseFOV + DynamicFOVAmount+1.f)
+			{
+				DynamicFOVSwitch = false;
+			}
+		}
+	} 
+	else if(!DynamicFOVSwitch && Speed < 1300.f)
+	{
+		if(auto World = GetWorld())
+		{
+			if(auto MyCharacter = Cast<AWokeAndShootCharacter>(GetOwner()))
+			{
+				UCameraComponent* FPC = MyCharacter->GetFirstPersonCameraComponent();
+				FPC->FieldOfView = FMath::FInterpTo(FPC->FieldOfView,MyCharacter->BaseFOV,World->GetDeltaSeconds(),10);
+
+				if(FPC->FieldOfView < MyCharacter->BaseFOV+1.f)
+				{
+					DynamicFOVSwitch = true;
+				}
+			}
+		}
+		
+	}
+
+}
+
+void UMyCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) 
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	DynamicFOV();
 }
