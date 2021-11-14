@@ -211,13 +211,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
 	TSubclassOf<class AWokeAndShootProjectile> ProjectileClass;
 
-	/** Sound to play each time we fire */
+	/** Sound to play each time we fire for FP*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
+	USoundBase* FireSoundFP;
+	/** Sound to play each time we fire for TP */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSoundTP;
 
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
 
 	float Client_MoveRightAxis;
 	float Client_MoveForwardAxis;

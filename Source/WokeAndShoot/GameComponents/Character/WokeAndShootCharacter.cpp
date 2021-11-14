@@ -127,7 +127,19 @@ void AWokeAndShootCharacter::OnFire()
 
 	if(!CanShoot()) {return;}
 	
+	
+	// Network ShotSFX
 	PlayShotSound();
+
+	if(!HasAuthority())
+	{
+		Server_RelayShotSound();
+	}
+	else
+	{
+		Multi_RelayShotSound();
+	}
+
 	// PlayMuzzleFlashAnimation();
 	ToggleShotAnim = true;
 
@@ -438,10 +450,22 @@ void AWokeAndShootCharacter::SetMuzzleLocation()
 // Character actions 
 void AWokeAndShootCharacter::PlayShotSound() 
 {
-	// Try and play a firing sound if specified
-	if (FireSound != nullptr)
+	if(IsLocallyControlled())
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		// Try and play a firing sound if specified
+		if (FireSoundFP != nullptr)
+		{
+			// UGameplayStatics::PlaySoundAtLocation(this, FireSound, FP_MuzzleLocation->GetComponentLocation());
+			UGameplayStatics::SpawnSoundAttached(FireSoundFP,FP_MuzzleLocation,TEXT("Muzzle"));
+		}
+	}
+	else
+	{
+		if (FireSoundTP != nullptr)
+		{
+			// UGameplayStatics::PlaySoundAtLocation(this, FireSound, FP_MuzzleLocation->GetComponentLocation());
+			UGameplayStatics::SpawnSoundAttached(FireSoundTP,FP_MuzzleLocation,TEXT("Muzzle"));
+		}
 	}
 }
 
@@ -667,7 +691,10 @@ bool AWokeAndShootCharacter::Server_RelayShotSound_Validate()
 
 void AWokeAndShootCharacter::Server_RelayShotSound_Implementation() 
 {
-	Multi_
+	// Run on server.
+	PlayShotSound();
+	// Replicate to clients.
+	Multi_RelayShotSound();
 }
 
 bool AWokeAndShootCharacter::Multi_RelayShotSound_Validate() 
@@ -677,7 +704,10 @@ bool AWokeAndShootCharacter::Multi_RelayShotSound_Validate()
 
 void AWokeAndShootCharacter::Multi_RelayShotSound_Implementation() 
 {
-	PlayShotSound();
+	if(!IsLocallyControlled())
+	{
+		PlayShotSound();
+	}
 }
 
 // bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
