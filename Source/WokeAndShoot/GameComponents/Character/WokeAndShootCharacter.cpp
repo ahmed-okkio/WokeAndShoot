@@ -214,14 +214,14 @@ void AWokeAndShootCharacter::DetonateBoostPad()
 	PrimedBoostPad->DetonatePad(this);
 
 	// Network
-	if(!HasAuthority())
-	{
-		Server_RelayBoost(PrimedBoostPad);
-	}
-	else
-	{
+	// if(!HasAuthority())
+	// {
+	// 	Server_RelayBoost(PrimedBoostPad);
+	// }
+	// else
+	// {
 
-	}
+	// }
 	
 	// Reseting boost pad slot.
 	PrimedBoostPad = nullptr;
@@ -376,6 +376,12 @@ void AWokeAndShootCharacter::DirectionalImpulse(FVector ImpulseDirection)
 {
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
 	CharacterMovement->Launch(ImpulseDirection);
+	if(!HasAuthority())
+	{
+		Server_RelayBoost(ImpulseDirection);
+	}
+
+
 	// CharacterMovement->GravityScale *= 0.9;
 }
 
@@ -682,14 +688,15 @@ void AWokeAndShootCharacter::Multi_RelayDamage_Implementation(float Damage, AAct
 	
 }
 
-bool AWokeAndShootCharacter::Server_RelayBoost_Validate(ABoostPad* HitBoostPad) 
+bool AWokeAndShootCharacter::Server_RelayBoost_Validate(FVector ImpulseDirection) 
 {
 	return true;
 }
 
-void AWokeAndShootCharacter::Server_RelayBoost_Implementation(ABoostPad* HitBoostPad)
+void AWokeAndShootCharacter::Server_RelayBoost_Implementation(FVector ImpulseDirection)
 {
-	HitBoostPad->DetonatePad(this);
+	CharacterMovement->Launch(ImpulseDirection);
+	// HitBoostPad->DetonatePad(this);
 	// Multi_RelayBoost(HitBoostPad);
 }
 
@@ -719,15 +726,15 @@ void AWokeAndShootCharacter::Multi_RelayShotSound_Implementation()
 	}
 }
 
-// bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(ABoostPad* HitBoostPad) 
-// {
-// 	return true;
-// }
+bool AWokeAndShootCharacter::Multi_RelayBoost_Validate(FVector ImpulseDirection) 
+{
+	return true;
+}
 
-// void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad) 
-// {
-// 	if(!IsLocallyControlled())
-// 	{
-// 		// HitBoostPad->DetonatePad(this);
-// 	}
-// }
+void AWokeAndShootCharacter::Multi_RelayBoost_Implementation(FVector ImpulseDirection) 
+{
+	// if(!IsLocallyControlled())
+	// {
+	// 	HitBoostPad->DetonatePad(this);
+	// }
+}

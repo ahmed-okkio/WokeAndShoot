@@ -15,6 +15,7 @@ class UAnimMontage;
 class USoundBase;
 class UParticleSystem;
 class UHealthComponent;
+class ABoostPad;
 
 UCLASS(config=Game)
 class AWokeAndShootCharacter : public ACharacter
@@ -119,9 +120,9 @@ private:
 	void Multi_RelayDamage_Implementation(float Damage, AActor* HitActor);
 
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Server_RelayBoost(ABoostPad* HitBoostPad);
-	bool Server_RelayBoost_Validate(ABoostPad* HitBoostPad);
-	void Server_RelayBoost_Implementation(ABoostPad* HitBoostPad);
+	void Server_RelayBoost(FVector ImpulseDirection);
+	bool Server_RelayBoost_Validate(FVector ImpulseDirection);
+	void Server_RelayBoost_Implementation(FVector ImpulseDirection);
 
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_RelayShotSound();
@@ -133,11 +134,10 @@ private:
 	bool Multi_RelayShotSound_Validate();
 	void Multi_RelayShotSound_Implementation();
 
-
-	// UFUNCTION(NetMulticast,Reliable,WithValidation)
-	// void Multi_RelayBoost(ABoostPad* HitBoostPad);
-	// bool Multi_RelayBoost_Validate(ABoostPad* HitBoostPad);
-	// void Multi_RelayBoost_Implementation(ABoostPad* HitBoostPad);
+	UFUNCTION(NetMulticast,Reliable,WithValidation)
+	void Multi_RelayBoost(FVector ImpulseDirection);
+	bool Multi_RelayBoost_Validate(FVector ImpulseDirection);
+	void Multi_RelayBoost_Implementation(FVector ImpulseDirection);
 
 protected:
 
