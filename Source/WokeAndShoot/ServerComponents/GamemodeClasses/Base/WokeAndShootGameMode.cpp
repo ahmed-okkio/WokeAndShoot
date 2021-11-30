@@ -77,11 +77,13 @@ void AWokeAndShootGameMode::UpdateScore(AController* Killer)
 {
 	uint32 KillerID = Killer->GetUniqueID();
 
-	Killer->GetPlayerState<AMyPlayerState>()->Score++;
+	
 	int32 CurrentPlayerScore = Players.Find(KillerID)->Score;
 	CurrentPlayerScore++;
 
 	Players.Find(KillerID)->Score = CurrentPlayerScore;
+	// Changed from Score++, not tested might break
+	Killer->GetPlayerState<AMyPlayerState>()->SetScore(CurrentPlayerScore);
 
 	if(bScoreLimit && CurrentPlayerScore == MaxScore)
 	{
