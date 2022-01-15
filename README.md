@@ -18,8 +18,7 @@ Download the latest version below.
 
 ## Dev blog
 
-I talk in more detail about some of the more prominent features in WOKEN on my portfolio/devblog.
-[Devblog](https://okkio.me/#/Woken)
+I talk in more detail about some of the more prominent features in WOKEN on my [portfolio/devblog.](https://okkio.me/#/Woken)
 
 ## Help
 
